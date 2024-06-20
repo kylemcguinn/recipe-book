@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  recipebook.api:
+    image: ${DOCKER_REGISTRY-}recipebookapi
+    build:
+      context: .
+      dockerfile: RecipeBook.Api/Dockerfile
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
