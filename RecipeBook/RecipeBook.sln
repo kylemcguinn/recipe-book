@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecipeBook.Api", "RecipeBoo
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{C67761D2-DC3C-4AFD-A23C-50351F8E52C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipeBook.Data", "RecipeBook.Data\RecipeBook.Data.csproj", "{33FF170E-65DD-43A2-B655-4AA4BCDCD453}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C67761D2-DC3C-4AFD-A23C-50351F8E52C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C67761D2-DC3C-4AFD-A23C-50351F8E52C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C67761D2-DC3C-4AFD-A23C-50351F8E52C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33FF170E-65DD-43A2-B655-4AA4BCDCD453}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33FF170E-65DD-43A2-B655-4AA4BCDCD453}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33FF170E-65DD-43A2-B655-4AA4BCDCD453}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33FF170E-65DD-43A2-B655-4AA4BCDCD453}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

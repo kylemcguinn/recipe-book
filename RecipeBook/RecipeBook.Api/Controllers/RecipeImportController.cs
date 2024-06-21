@@ -1,7 +1,10 @@
 ﻿using HtmlAgilityPack;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using Newtonsoft.Json.Linq;
+using RecipeBook.Api.Helpers;
+using RecipeBook.Data.Entities;
+using RecipeBook.Data.Persistence;
 
 namespace RecipeBook.Api.Controllers
 {
@@ -9,10 +12,29 @@ namespace RecipeBook.Api.Controllers
     [ApiController]
     public class RecipeImportController : ControllerBase
     {
-        [HttpGet(Name = "ImportRecipe")]
-        public async Task<IActionResult> Get(string url)
+        IPersistence Persistence { get; set; }
+
+        public RecipeImportController(IPersistence persistence)
         {
+            Persistence = persistence;
+        }
+
+        [HttpGet(Name = "ImportRecipe")]
+        public async Task<IActionResult> ImportRecipe(string url)
+        {
+            var userId = HttpContext.GetUserId();
+
             var json = await LoadRecipeFromUrl(url);
+
+            var recipe = new Recipe
+            {
+                Id = ObjectId.GenerateNewId(),
+                RecipeJson = BsonDocument.Parse(json),
+                UserId = userId
+            };
+
+            await Persistence.Persist(recipe);
+
             return new ContentResult()
             {
                 Content = json,

@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: RecipeBook.Api/Dockerfile
+
   mongodb:
     image: mongo:latest
     ports:
