@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using Newtonsoft.Json.Linq;
 using RecipeBook.Api.Helpers;
 using RecipeBook.Data.Entities;
@@ -10,13 +11,10 @@ namespace RecipeBook.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class RecipeImportController : ControllerBase
+    public class RecipeImportController : BaseController
     {
-        IPersistence Persistence { get; set; }
-
-        public RecipeImportController(IPersistence persistence)
+        public RecipeImportController(IPersistence persistence) : base(persistence)
         {
-            Persistence = persistence;
         }
 
         [HttpGet(Name = "ImportRecipe")]
@@ -26,10 +24,17 @@ namespace RecipeBook.Api.Controllers
 
             var json = await LoadRecipeFromUrl(url);
 
-            var recipe = new Recipe
+            var recipeJson = BsonSerializer.Deserialize<dynamic>(json);
+
+            if (recipeJson == null)
             {
-                Id = ObjectId.GenerateNewId(),
-                RecipeJson = BsonDocument.Parse(json),
+                throw new Exception("Unable to deserialize recipe json");
+            }
+
+            var recipe = new RecipeEntity
+            {
+                Id = ObjectId.GenerateNewId().ToString(),
+                RecipeJson = recipeJson,
                 UserId = userId
             };
 

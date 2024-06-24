@@ -7,21 +7,19 @@ namespace RecipeBook.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class RecipeController : ControllerBase
+    public class RecipeController : BaseController
     {
-        IPersistence Persistence { get; set; }
 
-        public RecipeController(IPersistence persistence)
+        public RecipeController(IPersistence persistence) : base(persistence)
         {
-            Persistence = persistence;
         }
 
-        [HttpGet(Name = "GetRecipes")]
-        public async Task<List<Recipe>> GetRecipes()
+        [HttpGet(Name = "GetRecipe")]
+        public async Task<List<RecipeEntity>> GetRecipe(string? id)
         {
             var userId = HttpContext.GetUserId();
 
-            var recipes = await Persistence.GetEntities<Recipe>(x => x.UserId == userId);
+            var recipes = await Persistence.GetEntities<RecipeEntity>(x => x.UserId == userId && (id == null || x.Id == id));
 
             return recipes.ToList();
         }

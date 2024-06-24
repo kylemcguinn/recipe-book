@@ -35,6 +35,15 @@ namespace RecipeBook.Data.Persistence
             return await entities.ToListAsync();
         }
 
+        public async Task<IEnumerable<T2>> GetProjectedEntities<T, T2>(Expression<Func<T, bool>> filterExpression, Expression<Func<T, T2>> projectionExpression) where T : EntityBase
+        {
+            var collection = Database.GetCollection<T>(DatabaseConfiguration.RecipesCollectionName);
+
+            var entities = await collection.Find(filterExpression).Project(projectionExpression).ToListAsync();
+
+            return entities;
+        }
+
         public async Task<T> GetEntity<T>(string id) where T : EntityBase
         {
             var collection = Database.GetCollection<T>(DatabaseConfiguration.RecipesCollectionName);
