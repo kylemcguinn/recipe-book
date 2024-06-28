@@ -25,22 +25,38 @@ namespace RecipeBook.Api.Controllers
             foreach (var recipe in recipes)
             {
                 var images = new List<RecipeCardImage>();
-                foreach (var image in recipe.RecipeJson.image)
+
+                var dynamicImages = recipe.RecipeJson.GetPropertyIfExists("image");
+
+                if (dynamicImages != null)
                 {
-                    images.Add(new RecipeCardImage
+                    foreach (var image in dynamicImages)
                     {
-                        Url = image.url,
-                        Width = image.width,
-                        Height = image.height
-                    });
+                        if (image is string)
+                        {
+                            images.Add(new RecipeCardImage
+                            {
+                                Url = image
+                            });
+                        }
+                        else
+                        {
+                            images.Add(new RecipeCardImage
+                            {
+                                Url = image.url,
+                                Width = image.width,
+                                Height = image.height
+                            });
+                        }
+                    }
                 }
 
                 var recipeCard = new RecipeCard
                 {
-                    Name = recipe.RecipeJson.name,
+                    Name = recipe.RecipeJson.GetPropertyIfExists("name"),
                     Image = images,
-                    Description = recipe.RecipeJson.description,
-                    Url = recipe.RecipeJson.url
+                    Description = recipe.RecipeJson.GetPropertyIfExists("description"),
+                    Url = recipe.RecipeJson.GetPropertyIfExists("url")
                 };
 
                 results.Add(recipeCard);

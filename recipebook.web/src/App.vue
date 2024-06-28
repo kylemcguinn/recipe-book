@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
+import TheHeader from './components/core/TheHeader.vue'
 </script>
 
 <template>
-  <header>
+  <!-- <header>
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
     </div>
-  </header>
+  </header> -->
 
-  <main>
+  <TheHeader />
+
+  <main class="mx-auto max-w-screen-xl">
     <!-- <TheWelcome /> -->
     <RouterView />
   </main>
@@ -27,7 +30,7 @@ header {
   display: block;
   margin: 0 auto 2rem;
 }
-
+/* 
 @media (min-width: 1024px) {
   header {
     display: flex;
@@ -44,5 +47,5 @@ header {
     place-items: flex-start;
     flex-wrap: wrap;
   }
-}
+} */
 </style>

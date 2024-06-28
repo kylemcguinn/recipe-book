@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Dynamic;
 
 
 namespace RecipeBook.Data.Entities
@@ -9,7 +10,7 @@ namespace RecipeBook.Data.Entities
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = null!;
-        public dynamic RecipeJson { get; set; } = null!;
+        public ExpandoObject RecipeJson { get; set; } = null!;
         public string UserId { get; set; } = null!;
     }
 }
