@@ -4,7 +4,7 @@
 
         <div
             class="relative flex h-full transform items-end border-2 border-black bg-white transition-transform group-hover:-translate-x-2 group-hover:-translate-y-2 w-52 items-center justify-center">
-            <div class="p-4 !pt-0 transition-opacity group-hover:absolute group-hover:opacity-0 sm:p-6 lg:p-8">
+            <div class="!pt-0 transition-opacity group-hover:absolute group-hover:opacity-0">
                 <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" class="h-12 w-full"
                     xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 45.402 45.402"
                     xml:space="preserve">
