@@ -1,5 +1,5 @@
 <template>
-    <a href="#" class="group relative block w-52 h-60">
+    <a href="#" @click="$emit('addRecipe')" class="group relative block w-52 h-60">
         <span class="absolute inset-0 border-2 border-dashed border-black"></span>
 
         <div
