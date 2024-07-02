@@ -53,6 +53,7 @@ namespace RecipeBook.Api.Controllers
 
                 var recipeCard = new RecipeCard
                 {
+                    Id = recipe.Id,
                     Name = recipe.RecipeJson.GetPropertyIfExists("name"),
                     Image = images,
                     Description = recipe.RecipeJson.GetPropertyIfExists("description"),

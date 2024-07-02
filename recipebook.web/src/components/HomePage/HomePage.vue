@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { RecipeCard } from '@/models/recipe';
 import { onMounted, ref } from 'vue'
+import RecipeCardTemplate from '../RecipesPage/RecipesCard.vue'
+import RecipesAddCard from '../RecipesPage/RecipesAddCard.vue';
 
 const recipes = ref<RecipeCard[]>([]);
 
@@ -22,13 +24,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex">
-    <div v-for="recipe in recipes" :key="recipe.id"
-      class="p-6 max-w-sm mx-auto bg-white rounded-xl shadow-md flex items-center space-x-4 max-w-200">
-      <div>
-        <div class="text-xl font-medium text-black">{{ recipe.name }}</div>
-        <p class="text-gray-500">{{ recipe.description }}</p>
-      </div>
+  <div class="flex flex-wrap justify-center">
+    <div class="ml-2 mb-2"><RecipesAddCard/></div>
+    <div v-for="recipe in recipes" :key="recipe.id" class="ml-2 mb-2">
+      <RecipeCardTemplate :recipe="recipe"></RecipeCardTemplate>
     </div>
   </div>
 </template>
