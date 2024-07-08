@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const urlText = ref("");
+const model = defineModel()
 
 </script>
 <template>
     <div class="relative">
         <label for="RecipeUrl" class="sr-only"> Recipe URL </label>
 
-        <input type="text" id="RecipeUrl" placeholder="www.example.com" v-model="urlText"
+        <input type="text" id="RecipeUrl" placeholder="www.example.com" v-model="model"
             class="w-full rounded-md border-gray-200 pe-10 shadow-sm sm:text-sm" />
 
         <span class="pointer-events-none absolute inset-y-0 end-0 grid w-10 place-content-center text-gray-500">

@@ -4,6 +4,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using Newtonsoft.Json.Linq;
 using RecipeBook.Api.Helpers;
+using RecipeBook.Api.Models;
 using RecipeBook.Data.Entities;
 using RecipeBook.Data.Persistence;
 
@@ -18,7 +19,7 @@ namespace RecipeBook.Api.Controllers
         }
 
         [HttpGet(Name = "ImportRecipe")]
-        public async Task<IActionResult> ImportRecipe(string url)
+        public async Task<RecipeCard> ImportRecipe(string url)
         {
             var userId = HttpContext.GetUserId();
 
@@ -40,11 +41,9 @@ namespace RecipeBook.Api.Controllers
 
             await Persistence.Persist(recipe);
 
-            return new ContentResult()
-            {
-                Content = json,
-                ContentType = "application/json"
-            };
+            var recipeCard = new RecipeCard(recipe);
+
+            return recipeCard;
         }
 
         private async Task<string> LoadRecipeFromUrl(string url)

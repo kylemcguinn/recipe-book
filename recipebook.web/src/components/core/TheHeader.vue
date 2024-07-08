@@ -14,7 +14,7 @@ import TheSearch from './TheSearch.vue'
           </div>
     
           <div>
-            <TheMenu />
+            <!-- <TheMenu /> -->
           </div>
           <div>
             <TheSearch />

@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import RecipesAddImportInput from './RecipesAddImportInput.vue';
+
+const urlText = ref("");
 </script>
 <template>
     <div class="rounded-2xl border border-blue-100 bg-white p-4 shadow-lg sm:p-6 lg:p-8 absolute z-50 top-32 -translate-x-1/2 left-1/2"
@@ -41,12 +44,12 @@ import RecipesAddImportInput from './RecipesAddImportInput.vue';
         </div>
 
         <p class="mt-4 text-gray-500">
-            <RecipesAddImportInput></RecipesAddImportInput>
+            <RecipesAddImportInput v-model="urlText"></RecipesAddImportInput>
         </p>
 
         <div class="mt-6 sm:flex sm:gap-4">
             <a class="inline-block w-full rounded-lg bg-blue-500 px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto"
-                href="#" @click="$emit('importRecipe', 'www.test.com')">
+                href="#" @click="$emit('importRecipe', urlText)">
                 Import Recipe
             </a>
 
