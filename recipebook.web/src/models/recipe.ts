@@ -1,3 +1,8 @@
+export interface RecipeContainer {
+    recipeCard: RecipeCard,
+    recipeJson: any,
+    isSelected: boolean
+}
 export interface RecipeCard {
     id: string;
     name: string;
