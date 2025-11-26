@@ -33,9 +33,8 @@ onMounted(() => {
         recipes.value = cards.map(x => {
           return {
             recipeCard: x,
-            isSelected: false,
-            recipeJson: null
-          }
+            isSelected: false
+          } as RecipeContainer
         });
       });
     })
@@ -102,7 +101,7 @@ function selectCard(index: number) {
     </swiper>
   </div>
   <RecipesAddNewModal v-if="showAddNewModal" @cancel-recipe="showAddNewModal = false"
-    @import-recipe="(url) => importRecipe(url)"></RecipesAddNewModal>
+    @import-recipe="(url: string) => importRecipe(url)"></RecipesAddNewModal>
   <RecipesAddSuccessAlert v-if="showSuccessAlert" @dismiss-alert="showSuccessAlert = false" title="Recipe imported"
     body="New recipe added!"></RecipesAddSuccessAlert>
 </template>

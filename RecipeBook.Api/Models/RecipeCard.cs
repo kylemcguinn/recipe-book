@@ -28,8 +28,8 @@ namespace RecipeBook.Api.Models
                         images.Add(new RecipeCardImage
                         {
                             Url = image.url,
-                            Width = image.width,
-                            Height = image.height
+                            Width = image.width is string widthStr ? int.TryParse(widthStr, out var w) ? w : 0 : (int)image.width,
+                            Height = image.height is string heightStr ? int.TryParse(heightStr, out var h) ? h : 0 : (int)image.height
                         });
                     }
                 }

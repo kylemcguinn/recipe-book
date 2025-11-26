@@ -1,6 +1,8 @@
 export interface RecipeContainer {
     recipeCard: RecipeCard,
-    recipeJson: any,
+    // Using any to avoid excessive stack depth errors with the deeply nested Recipe type from schema-dts
+    // This can be changed back to Recipe once TypeScript resolves the circular type issue
+    recipe?: any,
     isSelected: boolean
 }
 export interface RecipeCard {
