@@ -12,5 +12,7 @@ namespace RecipeBook.Data.Entities
         public string Id { get; set; } = null!;
         public ExpandoObject RecipeJson { get; set; } = null!;
         public string UserId { get; set; } = null!;
+        public DateTime? CreatedAtUtc { get; set; }
+        public DateTime? UpdatedAtUtc { get; set; }
     }
 }

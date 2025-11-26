@@ -23,7 +23,8 @@ const setControlledSwiper = (swiper: any) => {
 };
 
 onMounted(() => {
-  fetch('https://localhost:52167/RecipeCard', {
+  // fetch('https://localhost:52167/RecipeCard', {
+  fetch('https://localhost:7231/RecipeCard', {
     method: 'GET'
   })
     .then(response => {

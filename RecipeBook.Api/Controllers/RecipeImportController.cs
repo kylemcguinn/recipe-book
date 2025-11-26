@@ -36,7 +36,8 @@ namespace RecipeBook.Api.Controllers
             {
                 Id = ObjectId.GenerateNewId().ToString(),
                 RecipeJson = recipeJson,
-                UserId = userId
+                UserId = userId,
+                CreatedAtUtc = DateTime.UtcNow
             };
 
             await Persistence.Persist(recipe);
