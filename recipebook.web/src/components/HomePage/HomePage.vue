@@ -5,6 +5,7 @@ import RecipeCardTemplate from '../RecipesPage/RecipesCard.vue'
 import RecipesAddCard from '../RecipesPage/RecipesAddCard.vue';
 import RecipesAddNewModal from '../RecipesPage/RecipesAddNewModal.vue';
 import RecipesAddSuccessAlert from '../RecipesPage/RecipesAddSuccessAlert.vue';
+import RecipeDetailsView from '../RecipesPage/RecipeDetailsView.vue';
 
 
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -16,6 +17,7 @@ import type { Swiper as SwiperType } from 'swiper/types';
 const recipes = ref<RecipeContainer[]>([]);
 const showAddNewModal = ref(false);
 const showSuccessAlert = ref(false);
+const selectedRecipe = ref<RecipeContainer | null>(null);
 
 const controlledSwiper = ref<SwiperType | null>(null);
 const setControlledSwiper = (swiper: any) => {
@@ -83,6 +85,7 @@ function selectCard(index: number) {
       recipe.isSelected = index === i;
     }
   });
+  selectedRecipe.value = recipes.value[index];
 }
 
 </script>
@@ -101,6 +104,7 @@ function selectCard(index: number) {
       </swiper-slide>
     </swiper>
   </div>
+  <RecipeDetailsView :recipe="selectedRecipe" />
   <RecipesAddNewModal v-if="showAddNewModal" @cancel-recipe="showAddNewModal = false"
     @import-recipe="(url: string) => importRecipe(url)"></RecipesAddNewModal>
   <RecipesAddSuccessAlert v-if="showSuccessAlert" @dismiss-alert="showSuccessAlert = false" title="Recipe imported"
