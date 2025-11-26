@@ -43,12 +43,12 @@ const props = defineProps<{
                     </a>
                 </div>
 
-                <!-- Additional recipe details if available -->
-                <div v-if="props.recipe.recipe" class="mt-6 space-y-4">
-                    <div v-if="props.recipe.recipe.recipeIngredient && props.recipe.recipe.recipeIngredient.length > 0">
+                <!-- Additional recipe details -->
+                <div class="mt-6 space-y-4">
+                    <div v-if="props.recipe.recipeCard.recipeIngredient && props.recipe.recipeCard.recipeIngredient.length > 0">
                         <h3 class="text-lg font-semibold text-gray-700 mb-2">Ingredients</h3>
                         <ul class="list-disc list-inside space-y-1">
-                            <li v-for="(ingredient, index) in props.recipe.recipe.recipeIngredient"
+                            <li v-for="(ingredient, index) in props.recipe.recipeCard.recipeIngredient"
                                 :key="index"
                                 class="text-gray-600">
                                 {{ ingredient }}
@@ -56,36 +56,54 @@ const props = defineProps<{
                         </ul>
                     </div>
 
-                    <div v-if="props.recipe.recipe.recipeInstructions && props.recipe.recipe.recipeInstructions.length > 0">
+                    <div v-if="props.recipe.recipeCard.recipeInstructions && props.recipe.recipeCard.recipeInstructions.length > 0">
                         <h3 class="text-lg font-semibold text-gray-700 mb-2">Instructions</h3>
                         <ol class="list-decimal list-inside space-y-2">
-                            <li v-for="(instruction, index) in props.recipe.recipe.recipeInstructions"
+                            <li v-for="(instruction, index) in props.recipe.recipeCard.recipeInstructions"
                                 :key="index"
                                 class="text-gray-600">
-                                {{ typeof instruction === 'string' ? instruction : instruction.text }}
+                                {{ instruction }}
                             </li>
                         </ol>
                     </div>
 
-                    <div v-if="props.recipe.recipe.totalTime || props.recipe.recipe.prepTime || props.recipe.recipe.cookTime"
-                         class="flex flex-wrap gap-4 text-sm text-gray-600">
-                        <div v-if="props.recipe.recipe.prepTime" class="flex items-center">
-                            <span class="font-semibold mr-2">Prep Time:</span>
-                            <span>{{ props.recipe.recipe.prepTime }}</span>
+                    <div v-if="props.recipe.recipeCard.nutrition" class="mt-6">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Nutrition Information</h3>
+                        <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                            <div v-if="props.recipe.recipeCard.nutrition.calories">
+                                <span class="font-semibold">Calories:</span> {{ props.recipe.recipeCard.nutrition.calories }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.proteinContent">
+                                <span class="font-semibold">Protein:</span> {{ props.recipe.recipeCard.nutrition.proteinContent }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.carbohydrateContent">
+                                <span class="font-semibold">Carbohydrates:</span> {{ props.recipe.recipeCard.nutrition.carbohydrateContent }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.fatContent">
+                                <span class="font-semibold">Fat:</span> {{ props.recipe.recipeCard.nutrition.fatContent }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.saturatedFatContent">
+                                <span class="font-semibold">Saturated Fat:</span> {{ props.recipe.recipeCard.nutrition.saturatedFatContent }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.unsaturatedFatContent">
+                                <span class="font-semibold">Unsaturated Fat:</span> {{ props.recipe.recipeCard.nutrition.unsaturatedFatContent }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.transFatContent">
+                                <span class="font-semibold">Trans Fat:</span> {{ props.recipe.recipeCard.nutrition.transFatContent }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.cholesterolContent">
+                                <span class="font-semibold">Cholesterol:</span> {{ props.recipe.recipeCard.nutrition.cholesterolContent }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.sodiumContent">
+                                <span class="font-semibold">Sodium:</span> {{ props.recipe.recipeCard.nutrition.sodiumContent }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.fiberContent">
+                                <span class="font-semibold">Fiber:</span> {{ props.recipe.recipeCard.nutrition.fiberContent }}
+                            </div>
+                            <div v-if="props.recipe.recipeCard.nutrition.sugarContent">
+                                <span class="font-semibold">Sugar:</span> {{ props.recipe.recipeCard.nutrition.sugarContent }}
+                            </div>
                         </div>
-                        <div v-if="props.recipe.recipe.cookTime" class="flex items-center">
-                            <span class="font-semibold mr-2">Cook Time:</span>
-                            <span>{{ props.recipe.recipe.cookTime }}</span>
-                        </div>
-                        <div v-if="props.recipe.recipe.totalTime" class="flex items-center">
-                            <span class="font-semibold mr-2">Total Time:</span>
-                            <span>{{ props.recipe.recipe.totalTime }}</span>
-                        </div>
-                    </div>
-
-                    <div v-if="props.recipe.recipe.recipeYield" class="text-sm text-gray-600">
-                        <span class="font-semibold mr-2">Servings:</span>
-                        <span>{{ props.recipe.recipe.recipeYield }}</span>
                     </div>
                 </div>
             </div>

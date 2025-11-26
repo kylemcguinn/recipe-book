@@ -11,6 +11,9 @@ export interface RecipeCard {
     url: string;
     description: string;
     image: RecipeCardImage[];
+    recipeIngredient?: string[];
+    recipeInstructions?: string[];
+    nutrition?: RecipeNutrition;
 }
 
 export interface RecipeCardImage
@@ -18,4 +21,18 @@ export interface RecipeCardImage
     url: string;
     height: number;
     width: number;
+}
+
+export interface RecipeNutrition {
+    calories?: string;
+    unsaturatedFatContent?: string;
+    carbohydrateContent?: string;
+    cholesterolContent?: string;
+    fatContent?: string;
+    fiberContent?: string;
+    proteinContent?: string;
+    saturatedFatContent?: string;
+    sodiumContent?: string;
+    sugarContent?: string;
+    transFatContent?: string;
 }
