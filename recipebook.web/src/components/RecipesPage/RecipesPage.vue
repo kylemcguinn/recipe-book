@@ -5,7 +5,7 @@ import { onMounted, ref } from 'vue'
 const recipes = ref<RecipeCard[]>([]);
 
 onMounted(() => {
-  fetch('https://localhost:63983/RecipeCard', {
+  fetch('http://localhost:5281/RecipeCard', {
     method: 'GET'
   })
     .then(response => {

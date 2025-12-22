@@ -25,8 +25,8 @@ const setControlledSwiper = (swiper: any) => {
 };
 
 onMounted(() => {
-  // fetch('https://localhost:52167/RecipeCard', {
-  fetch('https://localhost:7231/RecipeCard', {
+  fetch('http://localhost:5281/RecipeCard', {
+  //fetch('http://localhost:50673/RecipeCard', {
     method: 'GET'
   })
     .then(response => {
@@ -57,19 +57,19 @@ function importRecipe(recipeUrl: string) {
   const encodedUrl = encodeURI(recipeUrl);
 
 
-  // fetch(`https://localhost:52167/RecipeImport?url=${encodedUrl}`, {
-  //   method: 'GET'
-  // })
-  //   .then(response => {
-  //     response.json().then(res => {
-  //       recipes.value.unshift(res);
+  fetch(`http://localhost:5281/RecipeImport?url=${encodedUrl}`, {
+    method: 'GET'
+  })
+    .then(response => {
+      response.json().then(res => {
+        recipes.value.unshift(res);
 
-  //       showSuccessAlert.value = true;
-  //     });
-  //   })
-  //   .catch(err => {
-  //     console.error(err);
-  //   });
+        showSuccessAlert.value = true;
+      });
+    })
+    .catch(err => {
+      console.error(err);
+    });
 
   controlledSwiper.value?.slideTo(0);
   selectCard(0);
