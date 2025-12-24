@@ -6,6 +6,7 @@ import RecipesAddCard from '../RecipesPage/RecipesAddCard.vue';
 import RecipesAddNewModal from '../RecipesPage/RecipesAddNewModal.vue';
 import RecipesAddSuccessAlert from '../RecipesPage/RecipesAddSuccessAlert.vue';
 import RecipeDetailsView from '../RecipesPage/RecipeDetailsView.vue';
+import { API_ENDPOINTS } from '@/config/api';
 
 
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -25,8 +26,7 @@ const setControlledSwiper = (swiper: any) => {
 };
 
 onMounted(() => {
-  fetch('http://localhost:5281/RecipeCard', {
-  //fetch('http://localhost:50673/RecipeCard', {
+  fetch(API_ENDPOINTS.RECIPE_CARD, {
     method: 'GET'
   })
     .then(response => {
@@ -56,8 +56,7 @@ function importRecipe(recipeUrl: string) {
 
   const encodedUrl = encodeURI(recipeUrl);
 
-
-  fetch(`http://localhost:5281/RecipeImport?url=${encodedUrl}`, {
+  fetch(`${API_ENDPOINTS.RECIPE_IMPORT}?url=${encodedUrl}`, {
     method: 'GET'
   })
     .then(response => {

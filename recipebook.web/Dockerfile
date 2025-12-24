@@ -17,6 +17,10 @@ COPY /recipebook.web .
 
 RUN ls
 
+# Accept build argument for API base URL
+ARG VITE_API_BASE_URL=http://localhost:50673
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
 # build app for production with minification
 RUN npm run build
 

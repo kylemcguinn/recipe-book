@@ -9,3 +9,8 @@ services:
       - RecipeBookDatabase__ConnectionString=mongodb://mongodb:27017/
     ports:
       - "50673:8080"
+
+  app:
+    build:
+      args:
+        - VITE_API_BASE_URL=http://localhost:50673

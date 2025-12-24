@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { RecipeCard } from '@/models/recipe';
 import { onMounted, ref } from 'vue'
+import { API_ENDPOINTS } from '@/config/api';
 
 const recipes = ref<RecipeCard[]>([]);
 
 onMounted(() => {
-  fetch('http://localhost:5281/RecipeCard', {
+  fetch(API_ENDPOINTS.RECIPE_CARD, {
     method: 'GET'
   })
     .then(response => {
