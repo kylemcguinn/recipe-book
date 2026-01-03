@@ -60,8 +60,12 @@ function importRecipe(recipeUrl: string) {
     method: 'GET'
   })
     .then(response => {
-      response.json().then(res => {
-        recipes.value.unshift(res);
+      response.json().then((res: RecipeCard) => {
+        const newRecipe: RecipeContainer = {
+          recipeCard: res,
+          isSelected: false
+        };
+        recipes.value.unshift(newRecipe);
 
         showSuccessAlert.value = true;
       });
