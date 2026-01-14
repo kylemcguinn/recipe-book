@@ -10,6 +10,18 @@ services:
     ports:
       - "50673:8080"
 
+  mongodb:
+    # OPTIONAL: Persist MongoDB data to host directory instead of Docker volume
+    # Uncomment the following lines to use host-based persistence:
+    # volumes:
+    #   - ./data/mongodb:/data/db
+    #
+    # This will create a 'data/mongodb' directory in your project root
+    # containing all MongoDB data files. You can backup/restore by copying this folder.
+    #
+    # NOTE: If you enable this, comment out 'mongodb_data:/data/db' in docker-compose.yml
+    # or the volume mount here will override it.
+
   app:
     build:
       args:

@@ -176,9 +176,41 @@ This allows storing diverse recipe formats from different websites while maintai
 
 ### Services
 - `recipebook.api`: API container (port 50673 → 8080)
-- `mongodb`: MongoDB with persistent volume `mongodb_data`
+- `mongodb`: MongoDB with persistent storage
 - `app`: Vue frontend (port 8080)
 
 ### MongoDB Connection
 - From host: `mongodb://localhost:27017/`
 - From API container: `mongodb://mongodb:27017/` (uses Docker service name)
+
+### MongoDB Data Persistence
+
+**Default (Named Volume)**:
+- Data persists in Docker-managed volume `mongodb_data`
+- Survives container restarts and `docker-compose down`
+- Deleted only with `docker-compose down -v`
+- Data location managed by Docker
+
+**Optional (Host Directory)**:
+To persist data to your local filesystem for easier backup/restore:
+
+1. Edit `docker-compose.override.yml` and uncomment the mongodb volumes section:
+   ```yaml
+   mongodb:
+     volumes:
+       - ./data/mongodb:/data/db
+   ```
+
+2. Comment out the volume in `docker-compose.yml`:
+   ```yaml
+   # volumes:
+   #   - mongodb_data:/data/db
+   ```
+
+3. Restart containers:
+   ```bash
+   docker-compose down
+   docker-compose up
+   ```
+
+This creates `data/mongodb/` in your project root containing all MongoDB files. The directory is gitignored by default. You can backup by copying this folder or restore by replacing it.
