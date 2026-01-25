@@ -5,6 +5,7 @@ import RecipeCardTemplate from '../RecipesPage/RecipesCard.vue'
 import RecipesAddCard from '../RecipesPage/RecipesAddCard.vue';
 import RecipesAddNewModal from '../RecipesPage/RecipesAddNewModal.vue';
 import RecipesAddSuccessAlert from '../RecipesPage/RecipesAddSuccessAlert.vue';
+import RecipesAddErrorAlert from '../RecipesPage/RecipesAddErrorAlert.vue';
 import RecipeDetailsView from '../RecipesPage/RecipeDetailsView.vue';
 import { API_ENDPOINTS } from '@/config/api';
 
@@ -18,6 +19,8 @@ import type { Swiper as SwiperType } from 'swiper/types';
 const recipes = ref<RecipeContainer[]>([]);
 const showAddNewModal = ref(false);
 const showSuccessAlert = ref(false);
+const showErrorAlert = ref(false);
+const errorMessage = ref('');
 const selectedRecipe = ref<RecipeContainer | null>(null);
 
 const controlledSwiper = ref<SwiperType | null>(null);
@@ -49,35 +52,34 @@ onMounted(() => {
 function importRecipe(recipeUrl: string) {
   showAddNewModal.value = false;
 
-  // if (!recipeUrl) {
-  //   alert("Invalid recipe url");
-  //   return;
-  // }
-
   const encodedUrl = encodeURI(recipeUrl);
 
   fetch(`${API_ENDPOINTS.RECIPE_IMPORT}?url=${encodedUrl}`, {
     method: 'GET'
   })
     .then(response => {
-      response.json().then((res: RecipeCard) => {
-        const newRecipe: RecipeContainer = {
-          recipeCard: res,
-          isSelected: false
-        };
-        recipes.value.unshift(newRecipe);
+      if (!response.ok) {
+        throw new Error(`Failed to import recipe: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then((res: RecipeCard) => {
+      const newRecipe: RecipeContainer = {
+        recipeCard: res,
+        isSelected: false
+      };
+      recipes.value.unshift(newRecipe);
 
-        showSuccessAlert.value = true;
-      });
+      controlledSwiper.value?.slideTo(0);
+      selectCard(0);
+
+      showSuccessAlert.value = true;
     })
     .catch(err => {
       console.error(err);
+      errorMessage.value = err.message || 'Failed to import recipe. Please try again.';
+      showErrorAlert.value = true;
     });
-
-  controlledSwiper.value?.slideTo(0);
-  selectCard(0);
-
-  showSuccessAlert.value = true;
 }
 
 function selectCard(index: number) {
@@ -112,6 +114,8 @@ function selectCard(index: number) {
     @import-recipe="(url: string) => importRecipe(url)"></RecipesAddNewModal>
   <RecipesAddSuccessAlert v-if="showSuccessAlert" @dismiss-alert="showSuccessAlert = false" title="Recipe imported"
     body="New recipe added!"></RecipesAddSuccessAlert>
+  <RecipesAddErrorAlert v-if="showErrorAlert" @dismiss-alert="showErrorAlert = false" title="Import failed"
+    :body="errorMessage"></RecipesAddErrorAlert>
 </template>
 
 <style scoped>
