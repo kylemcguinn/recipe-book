@@ -19,5 +19,11 @@ export const API_ENDPOINTS = {
   RECIPE_CARD: `${API_BASE_URL}/RecipeCard`,
   RECIPE_IMPORT: `${API_BASE_URL}/RecipeImport`,
   RECIPE: `${API_BASE_URL}/Recipe`,
-  DELETE_RECIPE_CARD: (id: string) => `${API_BASE_URL}/RecipeCard/${id}`
+  DELETE_RECIPE_CARD: (id: string) => `${API_BASE_URL}/RecipeCard/${id}`,
+  CATEGORY: `${API_BASE_URL}/Category`,
+  CREATE_CATEGORY: `${API_BASE_URL}/Category`,
+  UPDATE_CATEGORY: (id: string) => `${API_BASE_URL}/Category/${id}`,
+  DELETE_CATEGORY: (id: string) => `${API_BASE_URL}/Category/${id}`,
+  UPDATE_RECIPE_CATEGORIES: (id: string) => `${API_BASE_URL}/RecipeCard/${id}/categories`,
+  RECIPE_CARDS_GROUPED: `${API_BASE_URL}/RecipeCard/grouped`
 } as const;

@@ -47,5 +47,66 @@ namespace RecipeBook.Api.Controllers
                 return NotFound(); // Don't reveal recipe exists but user doesn't own it
             }
         }
+
+        [HttpPut("{id}/categories", Name = "UpdateRecipeCategories")]
+        public async Task<IActionResult> UpdateRecipeCategories(string id, [FromBody] List<string> categoryIds)
+        {
+            var userId = HttpContext.GetUserId();
+            var recipe = await Persistence.GetEntity<RecipeEntity>(id);
+
+            if (recipe == null || recipe.UserId != userId)
+                return NotFound();
+
+            recipe.CategoryIds = categoryIds;
+            recipe.UpdatedAtUtc = DateTime.UtcNow;
+
+            await Persistence.Update(id, recipe);
+            return Ok();
+        }
+
+        [HttpGet("grouped", Name = "GetRecipesGroupedByCategory")]
+        public async Task<Dictionary<string, List<RecipeCard>>> GetRecipesGroupedByCategory()
+        {
+            var userId = HttpContext.GetUserId();
+
+            // Get all recipes and categories
+            var recipes = await Persistence.GetEntities<RecipeEntity>(x => x.UserId == userId);
+            var categories = await Persistence.GetEntities<CategoryEntity>(x => x.UserId == userId);
+            var categoryMap = categories.OrderBy(c => c.DisplayOrder)
+                                        .ToDictionary(c => c.Id, c => c.Name);
+
+            // Initialize groups
+            var grouped = new Dictionary<string, List<RecipeCard>>();
+            foreach (var category in categoryMap.Values)
+            {
+                grouped[category] = new List<RecipeCard>();
+            }
+            grouped["Uncategorized"] = new List<RecipeCard>();
+
+            // Group recipes
+            foreach (var recipe in recipes)
+            {
+                var card = new RecipeCard(recipe);
+
+                if (recipe.CategoryIds == null || recipe.CategoryIds.Count == 0)
+                {
+                    grouped["Uncategorized"].Add(card);
+                }
+                else
+                {
+                    foreach (var catId in recipe.CategoryIds)
+                    {
+                        if (categoryMap.TryGetValue(catId, out var catName))
+                        {
+                            grouped[catName].Add(card);
+                        }
+                    }
+                }
+            }
+
+            // Remove empty categories
+            return grouped.Where(g => g.Value.Count > 0)
+                          .ToDictionary(g => g.Key, g => g.Value);
+        }
     }
 }

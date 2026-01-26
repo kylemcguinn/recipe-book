@@ -44,6 +44,25 @@ namespace RecipeBook.Api.Controllers
 
             var recipeCard = new RecipeCard(recipe);
 
+            // Extract suggested categories from JSON-LD
+            var suggestedCategories = recipe.RecipeJson.GetPropertyIfExists("recipeCategory");
+            if (suggestedCategories != null)
+            {
+                recipeCard.SuggestedCategories = new List<string>();
+
+                if (suggestedCategories is string singleCategory)
+                {
+                    recipeCard.SuggestedCategories.Add(singleCategory);
+                }
+                else if (suggestedCategories is IEnumerable<dynamic> categories)
+                {
+                    foreach (var cat in categories)
+                    {
+                        recipeCard.SuggestedCategories.Add(cat.ToString());
+                    }
+                }
+            }
+
             return recipeCard;
         }
 

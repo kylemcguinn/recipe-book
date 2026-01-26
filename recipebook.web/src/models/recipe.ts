@@ -14,6 +14,8 @@ export interface RecipeCard {
     recipeIngredient?: string[];
     recipeInstructions?: string[];
     nutrition?: RecipeNutrition;
+    categoryIds: string[];
+    suggestedCategories?: string[];
 }
 
 export interface RecipeCardImage

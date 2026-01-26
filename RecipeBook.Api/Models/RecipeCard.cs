@@ -95,6 +95,8 @@ namespace RecipeBook.Api.Models
                     TransFatContent = nutritionObj.GetPropertyIfExists("transFatContent")?.ToString()
                 };
             }
+
+            CategoryIds = recipe.CategoryIds ?? [];
         }
 
         public string? Id { get; set; } = null!;
@@ -105,6 +107,8 @@ namespace RecipeBook.Api.Models
         public List<string>? RecipeIngredient { get; set; }
         public List<string>? RecipeInstructions { get; set; }
         public RecipeNutrition? Nutrition { get; set; }
+        public List<string> CategoryIds { get; set; } = [];
+        public List<string>? SuggestedCategories { get; set; }  // Only populated during import
     }
 
     public class RecipeCardImage

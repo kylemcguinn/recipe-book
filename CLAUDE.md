@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Recipe-Book is a full-stack recipe management application with:
-- **Backend**: ASP.NET Core 8 Web API (C#)
+- **Backend**: ASP.NET Core 10 Web API (C#)
 - **Frontend**: Vue 3 + TypeScript + Vite + Tailwind CSS
 - **Database**: MongoDB (NoSQL)
 - **Architecture**: Layered architecture with repository pattern
@@ -14,7 +14,7 @@ Recipe-Book is a full-stack recipe management application with:
 
 ```
 recipe-book/
-├── RecipeBook.Api/           # ASP.NET Core 8 REST API
+├── RecipeBook.Api/           # ASP.NET Core 10 REST API
 ├── RecipeBook.Data/          # Data access layer with MongoDB persistence
 ├── recipebook.web/           # Vue 3 frontend
 ├── docker-compose.yml        # Docker orchestration

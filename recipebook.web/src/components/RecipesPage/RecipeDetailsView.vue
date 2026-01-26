@@ -1,9 +1,66 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import type { RecipeContainer } from '@/models/recipe';
+import type { Category } from '@/models/category';
+import { API_ENDPOINTS } from '@/config/api';
+import CategorySelectorModal from './CategorySelectorModal.vue';
 
 const props = defineProps<{
     recipe: RecipeContainer | null
 }>();
+
+const emit = defineEmits<{
+    categoriesUpdated: []
+}>();
+
+const showCategoryEditor = ref(false);
+const categories = ref<Category[]>([]);
+
+onMounted(async () => {
+    await loadCategories();
+});
+
+async function loadCategories() {
+    try {
+        const response = await fetch(API_ENDPOINTS.CATEGORY);
+        if (response.ok) {
+            categories.value = await response.json();
+        }
+    } catch (error) {
+        console.error('Failed to load categories:', error);
+    }
+}
+
+async function updateRecipeCategories(categoryIds: string[]) {
+    if (!props.recipe) return;
+
+    try {
+        const response = await fetch(API_ENDPOINTS.UPDATE_RECIPE_CATEGORIES(props.recipe.recipeCard.id), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(categoryIds)
+        });
+
+        if (response.ok) {
+            // Update local state
+            props.recipe.recipeCard.categoryIds = categoryIds;
+            showCategoryEditor.value = false;
+
+            // Emit event to parent to reload grouped recipes
+            emit('categoriesUpdated');
+        }
+    } catch (error) {
+        console.error('Failed to update recipe categories:', error);
+    }
+}
+
+function getCategoryName(categoryId: string): string {
+    return categories.value.find(c => c.id === categoryId)?.name ?? 'Unknown';
+}
+
+function getCategoryColor(categoryId: string): string {
+    return categories.value.find(c => c.id === categoryId)?.color ?? '#6B7280';
+}
 </script>
 
 <template>
@@ -24,6 +81,30 @@ const props = defineProps<{
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">
                     {{ props.recipe.recipeCard.name }}
                 </h2>
+
+                <!-- Categories Section -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Categories</h3>
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <span
+                            v-for="catId in props.recipe.recipeCard.categoryIds"
+                            :key="catId"
+                            class="px-3 py-1 rounded-full text-sm text-white font-medium"
+                            :style="{ backgroundColor: getCategoryColor(catId) }">
+                            {{ getCategoryName(catId) }}
+                        </span>
+                        <span
+                            v-if="props.recipe.recipeCard.categoryIds.length === 0"
+                            class="text-gray-500 text-sm italic">
+                            No categories assigned
+                        </span>
+                    </div>
+                    <button
+                        @click="showCategoryEditor = true"
+                        class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        Edit Categories
+                    </button>
+                </div>
 
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-gray-700 mb-2">Description</h3>
@@ -112,6 +193,12 @@ const props = defineProps<{
     <div v-else class="mt-8 bg-gray-100 rounded-lg p-8 text-center">
         <p class="text-gray-500 text-lg">Select a recipe to view details</p>
     </div>
+
+    <CategorySelectorModal
+        v-if="showCategoryEditor && props.recipe"
+        :current-category-ids="props.recipe.recipeCard.categoryIds"
+        @save="updateRecipeCategories"
+        @cancel="showCategoryEditor = false" />
 </template>
 
 <style scoped>
