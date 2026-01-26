@@ -38,6 +38,7 @@
             "webRoot": "${workspaceFolder}/recipebook.web",
             "runtimeArgs": [],
             "sourceMaps": true,
+            "userDataDir": true,
             "preLaunchTask": "npm: dev"
         },
         {
