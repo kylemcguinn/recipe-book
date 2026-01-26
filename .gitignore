@@ -265,3 +265,6 @@ __pycache__/
 
 # Docker volumes - MongoDB data directory (if using host-based persistence)
 data/mongodb/
+
+# Visual Studio Code
+.vscode/
