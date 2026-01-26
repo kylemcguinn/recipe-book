@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/RecipeBook.Api/bin/Debug/net8.0/RecipeBook.Api.dll",
+            "program": "${workspaceFolder}/RecipeBook.Api/bin/Debug/net10.0/RecipeBook.Api.dll",
             "args": [],
             "cwd": "${workspaceFolder}/RecipeBook.Api",
             "stopAtEntry": false,
@@ -36,9 +36,7 @@
             "request": "launch",
             "url": "http://localhost:5173",
             "webRoot": "${workspaceFolder}/recipebook.web",
-            "runtimeArgs": [
-                "--disable-web-security"
-            ],
+            "runtimeArgs": [],
             "sourceMaps": true,
             "preLaunchTask": "npm: dev"
         },
@@ -48,9 +46,7 @@
             "request": "launch",
             "url": "http://localhost:5173",
             "webRoot": "${workspaceFolder}/recipebook.web",
-            "runtimeArgs": [
-                "--disable-web-security"
-            ],
+            "runtimeArgs": [],
             "sourceMaps": true,
             "preLaunchTask": "npm: dev"
         }

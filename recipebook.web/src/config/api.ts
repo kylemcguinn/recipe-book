@@ -18,5 +18,6 @@ console.log('API_BASE_URL configured as:', API_BASE_URL);
 export const API_ENDPOINTS = {
   RECIPE_CARD: `${API_BASE_URL}/RecipeCard`,
   RECIPE_IMPORT: `${API_BASE_URL}/RecipeImport`,
-  RECIPE: `${API_BASE_URL}/Recipe`
+  RECIPE: `${API_BASE_URL}/Recipe`,
+  DELETE_RECIPE_CARD: (id: string) => `${API_BASE_URL}/RecipeCard/${id}`
 } as const;

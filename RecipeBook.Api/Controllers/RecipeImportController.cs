@@ -47,7 +47,7 @@ namespace RecipeBook.Api.Controllers
             return recipeCard;
         }
 
-        private async Task<string> LoadRecipeFromUrl(string url)
+        private async Task<string?> LoadRecipeFromUrl(string url)
         {
             HtmlWeb web = new HtmlWeb();
             var htmlDoc = await web.LoadFromWebAsync(url);
@@ -69,8 +69,8 @@ namespace RecipeBook.Api.Controllers
             if (graph != null) //If the graph attribute is present, then there are multiple json-ld objects bundled in this script block.
             {
                 var graphObject = graph as JArray;
-                var recipeObject = graphObject.First(x => x["@type"] != null && x["@type"].ToString() == "Recipe");
-                json = recipeObject.ToString();
+                var recipeObject = graphObject?.First(x => x["@type"] != null && x["@type"].ToString() == "Recipe");
+                json = recipeObject?.ToString();
             }
 
             return json;

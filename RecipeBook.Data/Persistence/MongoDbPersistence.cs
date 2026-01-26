@@ -19,11 +19,18 @@ namespace RecipeBook.Data.Persistence
             Database = client.GetDatabase(DatabaseConfiguration.DatabaseName);
         }
 
-        public async Task DeleteEntity<T>(string id) where T : EntityBase
+        public async Task DeleteEntity<T>(string id, string userId) where T : EntityBase
         {
-            var collection = Database.GetCollection<T>(DatabaseConfiguration.RecipesCollectionName);
+            var collection = Database.GetCollection<RecipeEntity>(DatabaseConfiguration.RecipesCollectionName);
 
-            await collection.DeleteOneAsync(x => x.Id.ToString() == id);
+            // Delete only if both id AND userId match (security)
+            var result = await collection.DeleteOneAsync(x =>
+                x.Id == id && x.UserId == userId);
+
+            if (result.DeletedCount == 0)
+            {
+                throw new UnauthorizedAccessException("Recipe not found or access denied");
+            }
         }
 
         public async Task<IEnumerable<T>> GetEntities<T>(Expression<Func<T, bool>> filterExpression) where T : EntityBase

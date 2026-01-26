@@ -31,5 +31,21 @@ namespace RecipeBook.Api.Controllers
 
             return results;
         }
+
+        [HttpDelete("{id}", Name = "DeleteRecipeCard")]
+        public async Task<IActionResult> DeleteRecipeCard(string id)
+        {
+            var userId = HttpContext.GetUserId();
+
+            try
+            {
+                await Persistence.DeleteEntity<RecipeEntity>(id, userId);
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return NotFound(); // Don't reveal recipe exists but user doesn't own it
+            }
+        }
     }
 }

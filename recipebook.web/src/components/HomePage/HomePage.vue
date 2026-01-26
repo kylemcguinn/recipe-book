@@ -6,6 +6,8 @@ import RecipesAddCard from '../RecipesPage/RecipesAddCard.vue';
 import RecipesAddNewModal from '../RecipesPage/RecipesAddNewModal.vue';
 import RecipesAddSuccessAlert from '../RecipesPage/RecipesAddSuccessAlert.vue';
 import RecipesAddErrorAlert from '../RecipesPage/RecipesAddErrorAlert.vue';
+import RecipesDeleteConfirmModal from '../RecipesPage/RecipesDeleteConfirmModal.vue';
+import RecipesDeleteSuccessAlert from '../RecipesPage/RecipesDeleteSuccessAlert.vue';
 import RecipeDetailsView from '../RecipesPage/RecipeDetailsView.vue';
 import { API_ENDPOINTS } from '@/config/api';
 
@@ -22,6 +24,12 @@ const showSuccessAlert = ref(false);
 const showErrorAlert = ref(false);
 const errorMessage = ref('');
 const selectedRecipe = ref<RecipeContainer | null>(null);
+
+// Delete state
+const showDeleteConfirmModal = ref(false);
+const recipeToDelete = ref<RecipeContainer | null>(null);
+const showDeleteSuccessAlert = ref(false);
+const deleteSuccessMessage = ref('');
 
 const controlledSwiper = ref<SwiperType | null>(null);
 const setControlledSwiper = (swiper: any) => {
@@ -93,6 +101,67 @@ function selectCard(index: number) {
   selectedRecipe.value = recipes.value[index];
 }
 
+// Delete flow functions
+function initiateDelete(recipe: RecipeContainer) {
+  recipeToDelete.value = recipe;
+  showDeleteConfirmModal.value = true;
+}
+
+function cancelDelete() {
+  showDeleteConfirmModal.value = false;
+  recipeToDelete.value = null;
+}
+
+async function confirmDelete() {
+  if (!recipeToDelete.value) return;
+
+  const recipeId = recipeToDelete.value.recipeCard.id;
+  const recipeName = recipeToDelete.value.recipeCard.name;
+
+  showDeleteConfirmModal.value = false;
+
+  try {
+    const response = await fetch(API_ENDPOINTS.DELETE_RECIPE_CARD(recipeId), {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete recipe: ${response.statusText}`);
+    }
+
+    // Find index of deleted recipe
+    const deletedIndex = recipes.value.findIndex(r => r.recipeCard.id === recipeId);
+
+    // Clear selection if deleting selected recipe
+    if (selectedRecipe.value?.recipeCard.id === recipeId) {
+      selectedRecipe.value = null;
+    }
+
+    // Remove from array
+    recipes.value.splice(deletedIndex, 1);
+
+    // Auto-select adjacent recipe for smooth UX
+    if (recipes.value.length > 0) {
+      const newSelectedIndex = deletedIndex > 0 ? deletedIndex - 1 : 0;
+      if (newSelectedIndex < recipes.value.length) {
+        controlledSwiper.value?.slideTo(newSelectedIndex);
+        selectCard(newSelectedIndex);
+      }
+    }
+
+    // Show success alert
+    deleteSuccessMessage.value = `"${recipeName}" deleted successfully`;
+    showDeleteSuccessAlert.value = true;
+
+  } catch (err: any) {
+    console.error(err);
+    errorMessage.value = err.message || 'Failed to delete recipe. Please try again.';
+    showErrorAlert.value = true;
+  } finally {
+    recipeToDelete.value = null;
+  }
+}
+
 </script>
 
 <template>
@@ -105,7 +174,7 @@ function selectCard(index: number) {
         enabled: true,
       }" :modules="[Navigation, Keyboard, Mousewheel, Controller]" class="mySwiper">
       <swiper-slide v-for="(recipe, index) in recipes" :key="recipe.recipeCard.id" class="w-52">
-        <RecipeCardTemplate :recipe="recipe" @recipe-clicked="selectCard(index)"></RecipeCardTemplate>
+        <RecipeCardTemplate :recipe="recipe" @recipe-clicked="selectCard(index)" @delete-recipe="initiateDelete"></RecipeCardTemplate>
       </swiper-slide>
     </swiper>
   </div>
@@ -116,6 +185,18 @@ function selectCard(index: number) {
     body="New recipe added!"></RecipesAddSuccessAlert>
   <RecipesAddErrorAlert v-if="showErrorAlert" @dismiss-alert="showErrorAlert = false" title="Import failed"
     :body="errorMessage"></RecipesAddErrorAlert>
+
+  <!-- Delete modals/alerts -->
+  <RecipesDeleteConfirmModal
+    v-if="showDeleteConfirmModal && recipeToDelete"
+    :recipe="recipeToDelete"
+    @confirm-delete="confirmDelete"
+    @cancel-delete="cancelDelete" />
+  <RecipesDeleteSuccessAlert
+    v-if="showDeleteSuccessAlert"
+    @dismiss-alert="showDeleteSuccessAlert = false"
+    title="Recipe deleted"
+    :body="deleteSuccessMessage" />
 </template>
 
 <style scoped>
