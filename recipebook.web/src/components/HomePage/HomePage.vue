@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { RecipeCard, RecipeContainer } from '@/models/recipe';
 import type { Category } from '@/models/category';
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router';
 import RecipeCardTemplate from '../RecipesPage/RecipesCard.vue'
 import RecipesAddCard from '../RecipesPage/RecipesAddCard.vue';
 import RecipesAddNewModal from '../RecipesPage/RecipesAddNewModal.vue';
@@ -17,6 +18,8 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Navigation, Keyboard, Mousewheel } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+
+const route = useRoute();
 
 const allRecipes = ref<RecipeContainer[]>([]);
 const recipesByCategory = ref<Record<string, RecipeContainer[]>>({});
@@ -81,6 +84,99 @@ async function loadRecipes() {
   }
 }
 
+/**
+ * Filters a recipe based on search term across name, description, and ingredients
+ * @param recipe RecipeContainer to filter
+ * @param searchTerm Search term (case-insensitive)
+ * @returns true if recipe matches search criteria
+ */
+function matchesSearch(recipe: RecipeContainer, searchTerm: string): boolean {
+  if (!searchTerm) return true; // No search term means show all
+
+  const lowerSearch = searchTerm.toLowerCase();
+  const card = recipe.recipeCard;
+
+  // Search in name
+  if (card.name?.toLowerCase().includes(lowerSearch)) {
+    return true;
+  }
+
+  // Search in description
+  if (card.description?.toLowerCase().includes(lowerSearch)) {
+    return true;
+  }
+
+  // Search in ingredients array
+  if (card.recipeIngredient?.some(ingredient =>
+    ingredient.toLowerCase().includes(lowerSearch)
+  )) {
+    return true;
+  }
+
+  return false;
+}
+
+// Computed property for current search term
+const currentSearch = computed(() => {
+  const search = route.query.search;
+  return typeof search === 'string' ? search.trim() : '';
+});
+
+// Filtered "All Recipes" carousel
+const filteredAllRecipes = computed(() => {
+  const searchTerm = currentSearch.value;
+  if (!searchTerm) return allRecipes.value;
+
+  return allRecipes.value.filter(recipe => matchesSearch(recipe, searchTerm));
+});
+
+// Filtered recipes by category
+const filteredRecipesByCategory = computed(() => {
+  const searchTerm = currentSearch.value;
+  if (!searchTerm) return recipesByCategory.value;
+
+  const filtered: Record<string, RecipeContainer[]> = {};
+
+  for (const [categoryName, recipes] of Object.entries(recipesByCategory.value)) {
+    const categoryFiltered = recipes.filter(recipe => matchesSearch(recipe, searchTerm));
+    if (categoryFiltered.length > 0) {
+      filtered[categoryName] = categoryFiltered;
+    }
+  }
+
+  return filtered;
+});
+
+// Visible categories (only show categories with matches)
+const visibleCategories = computed(() => {
+  const searchTerm = currentSearch.value;
+  if (!searchTerm) return categoryOrder.value;
+
+  return categoryOrder.value.filter(categoryName =>
+    filteredRecipesByCategory.value[categoryName] !== undefined
+  );
+});
+
+// Computed for showing "no results" message
+const hasSearchResults = computed(() => {
+  return filteredAllRecipes.value.length > 0;
+});
+
+// Watch for when selected recipe gets filtered out
+watch([filteredAllRecipes, currentSearch], () => {
+  if (selectedRecipe.value && currentSearch.value) {
+    const stillVisible = filteredAllRecipes.value.some(
+      r => r.recipeCard.id === selectedRecipe.value?.recipeCard.id
+    );
+
+    if (!stillVisible) {
+      // Clear selection if filtered out
+      selectedRecipe.value = null;
+      selectedCarousel.value = null;
+    }
+  }
+});
+
 function importRecipe(recipeUrl: string) {
   showAddNewModal.value = false;
 
@@ -107,21 +203,19 @@ function importRecipe(recipeUrl: string) {
     });
 }
 
-function selectCard(categoryName: string | null, index: number) {
+function selectCard(categoryName: string | null, recipe: RecipeContainer) {
   // Deselect all recipes in all categories
   allRecipes.value.forEach(r => r.isSelected = false);
 
-  // Select the clicked recipe
-  if (categoryName === null) {
-    // Selection from "All Recipes" carousel
-    allRecipes.value[index].isSelected = true;
-    selectedRecipe.value = allRecipes.value[index];
-    selectedCarousel.value = 'all';
-  } else {
-    // Selection from category carousel
-    recipesByCategory.value[categoryName][index].isSelected = true;
-    selectedRecipe.value = recipesByCategory.value[categoryName][index];
-    selectedCarousel.value = categoryName;
+  // Find and select the recipe in the original unfiltered array
+  const recipeToSelect = allRecipes.value.find(r =>
+    r.recipeCard.id === recipe.recipeCard.id
+  );
+
+  if (recipeToSelect) {
+    recipeToSelect.isSelected = true;
+    selectedRecipe.value = recipeToSelect;
+    selectedCarousel.value = categoryName === null ? 'all' : categoryName;
   }
 }
 
@@ -183,54 +277,75 @@ async function confirmDelete() {
       <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
         All Recipes
         <span class="text-gray-500 text-base font-normal">
-          ({{ allRecipes.length }})
+          ({{ filteredAllRecipes.length }})
+        </span>
+        <span v-if="currentSearch" class="text-sm text-blue-600 font-normal">
+          - searching for "{{ currentSearch }}"
         </span>
       </h2>
 
-      <!-- Add Recipe Button - full width on mobile, floated on larger screens -->
-      <div class="mb-4 md:mb-0 md:float-left md:mr-12">
-        <RecipesAddCard @add-recipe="showAddNewModal = true" />
+      <!-- No results message -->
+      <div v-if="currentSearch && !hasSearchResults"
+           class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+        <p class="text-gray-700 text-lg">
+          No recipes found matching "{{ currentSearch }}"
+        </p>
+        <p class="text-gray-600 text-sm mt-2">
+          Try a different search term or
+          <button @click="$router.push({ query: {} })"
+                  class="text-blue-600 hover:text-blue-800 underline">
+            clear search
+          </button>
+        </p>
       </div>
 
-      <swiper
-        :slidesPerView="'auto'"
-        :spaceBetween="30"
-        :loop="false"
-        :navigation="true"
-        :mousewheel="true"
-        :keyboard="{ enabled: true }"
-        :modules="[Navigation, Keyboard, Mousewheel]"
-        class="mySwiper">
+      <!-- Recipe carousel (show only if has results or no search) -->
+      <template v-else>
+        <!-- Add Recipe Button - full width on mobile, floated on larger screens -->
+        <div class="mb-4 md:mb-0 md:float-left md:mr-12">
+          <RecipesAddCard @add-recipe="showAddNewModal = true" />
+        </div>
 
-        <!-- All recipe cards -->
-        <swiper-slide
-          v-for="(recipe, index) in allRecipes"
-          :key="recipe.recipeCard.id"
-          class="w-52">
-          <RecipeCardTemplate
-            :recipe="recipe"
-            @recipe-clicked="selectCard(null, index)"
-            @delete-recipe="initiateDelete">
-          </RecipeCardTemplate>
-        </swiper-slide>
-      </swiper>
+        <swiper
+          :slidesPerView="'auto'"
+          :spaceBetween="30"
+          :loop="false"
+          :navigation="true"
+          :mousewheel="true"
+          :keyboard="{ enabled: true }"
+          :modules="[Navigation, Keyboard, Mousewheel]"
+          class="mySwiper">
 
-      <!-- Show recipe details if selected from "All Recipes" carousel -->
-      <RecipeDetailsView
-        v-if="selectedCarousel === 'all'"
-        :recipe="selectedRecipe"
-        @categories-updated="loadRecipes" />
+          <!-- All recipe cards -->
+          <swiper-slide
+            v-for="recipe in filteredAllRecipes"
+            :key="recipe.recipeCard.id"
+            class="w-52">
+            <RecipeCardTemplate
+              :recipe="recipe"
+              @recipe-clicked="selectCard(null, recipe)"
+              @delete-recipe="initiateDelete">
+            </RecipeCardTemplate>
+          </swiper-slide>
+        </swiper>
+
+        <!-- Show recipe details if selected from "All Recipes" carousel -->
+        <RecipeDetailsView
+          v-if="selectedCarousel === 'all' && selectedRecipe"
+          :recipe="selectedRecipe"
+          @categories-updated="loadRecipes" />
+      </template>
     </div>
 
-    <!-- Iterate over categories -->
-    <div v-for="categoryName in categoryOrder" :key="categoryName" class="mb-12">
+    <!-- Iterate over visible categories only -->
+    <div v-for="categoryName in visibleCategories" :key="categoryName" class="mb-12">
       <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
         <span
           class="w-4 h-4 rounded-full"
           :style="{ backgroundColor: categoryColors[categoryName] }"></span>
         {{ categoryName }}
         <span class="text-gray-500 text-base font-normal">
-          ({{ recipesByCategory[categoryName].length }})
+          ({{ filteredRecipesByCategory[categoryName].length }})
         </span>
       </h2>
 
@@ -245,12 +360,12 @@ async function confirmDelete() {
         class="mySwiper">
 
         <swiper-slide
-          v-for="(recipe, index) in recipesByCategory[categoryName]"
+          v-for="recipe in filteredRecipesByCategory[categoryName]"
           :key="recipe.recipeCard.id"
           class="w-52">
           <RecipeCardTemplate
             :recipe="recipe"
-            @recipe-clicked="selectCard(categoryName, index)"
+            @recipe-clicked="selectCard(categoryName, recipe)"
             @delete-recipe="initiateDelete">
           </RecipeCardTemplate>
         </swiper-slide>
@@ -258,7 +373,7 @@ async function confirmDelete() {
 
       <!-- Show recipe details if selected from this category carousel -->
       <RecipeDetailsView
-        v-if="selectedCarousel === categoryName"
+        v-if="selectedCarousel === categoryName && selectedRecipe"
         :recipe="selectedRecipe"
         @categories-updated="loadRecipes" />
     </div>
