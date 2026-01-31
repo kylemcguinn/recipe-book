@@ -18,6 +18,7 @@ import { Navigation, Keyboard, Mousewheel } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
+const allRecipes = ref<RecipeContainer[]>([]);
 const recipesByCategory = ref<Record<string, RecipeContainer[]>>({});
 const categoryOrder = ref<string[]>([]);
 const categoryColors = ref<Record<string, string>>({});
@@ -45,6 +46,7 @@ async function loadRecipes() {
     // Convert to RecipeContainer structure
     recipesByCategory.value = {};
     categoryOrder.value = [];
+    allRecipes.value = [];
 
     // Sort: user categories alphabetically, then "Uncategorized" last
     const categories = Object.keys(grouped).sort((a, b) => {
@@ -59,6 +61,9 @@ async function loadRecipes() {
         recipeCard: card,
         isSelected: false
       }));
+
+      // Add to all recipes
+      allRecipes.value.push(...recipesByCategory.value[categoryName]);
     });
 
     // Fetch category metadata for colors
@@ -101,15 +106,20 @@ function importRecipe(recipeUrl: string) {
     });
 }
 
-function selectCard(categoryName: string, index: number) {
+function selectCard(categoryName: string | null, index: number) {
   // Deselect all recipes in all categories
-  Object.values(recipesByCategory.value).forEach(recipes => {
-    recipes.forEach(r => r.isSelected = false);
-  });
+  allRecipes.value.forEach(r => r.isSelected = false);
 
   // Select the clicked recipe
-  recipesByCategory.value[categoryName][index].isSelected = true;
-  selectedRecipe.value = recipesByCategory.value[categoryName][index];
+  if (categoryName === null) {
+    // Selection from "All Recipes" carousel
+    allRecipes.value[index].isSelected = true;
+    selectedRecipe.value = allRecipes.value[index];
+  } else {
+    // Selection from category carousel
+    recipesByCategory.value[categoryName][index].isSelected = true;
+    selectedRecipe.value = recipesByCategory.value[categoryName][index];
+  }
 }
 
 // Delete flow functions
@@ -165,9 +175,41 @@ async function confirmDelete() {
 
 <template>
   <div>
-    <!-- Add Recipe Card -->
-    <div class="mb-8">
-      <RecipesAddCard @add-recipe="showAddNewModal = true" />
+    <!-- All Recipes Carousel -->
+    <div class="mb-12">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        All Recipes
+        <span class="text-gray-500 text-base font-normal">
+          ({{ allRecipes.length }})
+        </span>
+      </h2>
+
+      <div class="float-left mr-12">
+        <RecipesAddCard @add-recipe="showAddNewModal = true" />
+      </div>
+
+      <swiper
+        :slidesPerView="'auto'"
+        :spaceBetween="30"
+        :loop="false"
+        :navigation="true"
+        :mousewheel="true"
+        :keyboard="{ enabled: true }"
+        :modules="[Navigation, Keyboard, Mousewheel]"
+        class="mySwiper">
+
+        <!-- All recipe cards -->
+        <swiper-slide
+          v-for="(recipe, index) in allRecipes"
+          :key="recipe.recipeCard.id"
+          class="w-52">
+          <RecipeCardTemplate
+            :recipe="recipe"
+            @recipe-clicked="selectCard(null, index)"
+            @delete-recipe="initiateDelete">
+          </RecipeCardTemplate>
+        </swiper-slide>
+      </swiper>
     </div>
 
     <!-- Iterate over categories -->
