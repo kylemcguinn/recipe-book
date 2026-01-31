@@ -27,6 +27,7 @@ const showSuccessAlert = ref(false);
 const showErrorAlert = ref(false);
 const errorMessage = ref('');
 const selectedRecipe = ref<RecipeContainer | null>(null);
+const selectedCarousel = ref<string | null>(null); // Track which carousel was selected
 
 // Delete state
 const showDeleteConfirmModal = ref(false);
@@ -115,10 +116,12 @@ function selectCard(categoryName: string | null, index: number) {
     // Selection from "All Recipes" carousel
     allRecipes.value[index].isSelected = true;
     selectedRecipe.value = allRecipes.value[index];
+    selectedCarousel.value = 'all';
   } else {
     // Selection from category carousel
     recipesByCategory.value[categoryName][index].isSelected = true;
     selectedRecipe.value = recipesByCategory.value[categoryName][index];
+    selectedCarousel.value = categoryName;
   }
 }
 
@@ -210,6 +213,12 @@ async function confirmDelete() {
           </RecipeCardTemplate>
         </swiper-slide>
       </swiper>
+
+      <!-- Show recipe details if selected from "All Recipes" carousel -->
+      <RecipeDetailsView
+        v-if="selectedCarousel === 'all'"
+        :recipe="selectedRecipe"
+        @categories-updated="loadRecipes" />
     </div>
 
     <!-- Iterate over categories -->
@@ -245,11 +254,13 @@ async function confirmDelete() {
           </RecipeCardTemplate>
         </swiper-slide>
       </swiper>
-    </div>
 
-    <RecipeDetailsView
-      :recipe="selectedRecipe"
-      @categories-updated="loadRecipes" />
+      <!-- Show recipe details if selected from this category carousel -->
+      <RecipeDetailsView
+        v-if="selectedCarousel === categoryName"
+        :recipe="selectedRecipe"
+        @categories-updated="loadRecipes" />
+    </div>
 
     <!-- Modals and alerts -->
     <RecipesAddNewModal
