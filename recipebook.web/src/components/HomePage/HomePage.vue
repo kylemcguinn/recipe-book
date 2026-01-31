@@ -187,7 +187,8 @@ async function confirmDelete() {
         </span>
       </h2>
 
-      <div class="float-left mr-12">
+      <!-- Add Recipe Button - full width on mobile, floated on larger screens -->
+      <div class="mb-4 md:mb-0 md:float-left md:mr-12">
         <RecipesAddCard @add-recipe="showAddNewModal = true" />
       </div>
 
