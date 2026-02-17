@@ -1,0 +1,9 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored to prevent secrets from being committed.
+
+subscription_id            = "00000000-0000-0000-0000-000000000000"
+tenant_id                  = "d9963c60-174c-4e11-8a50-6417ef7951cf"
+resource_group_name        = "recipe-book-rg"
+location                   = "eastus"
+acr_name                   = "recipebooknexusacr"   # Must be globally unique, alphanumeric only
+mongodb_connection_string  = "mongodb+srv://<user>:<password>@<cluster>.mongodb.net/RecipeBook?retryWrites=true&w=majority"
