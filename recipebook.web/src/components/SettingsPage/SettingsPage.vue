@@ -105,11 +105,11 @@ function cancelEdit() {
 </script>
 
 <template>
-  <div class="container mx-auto p-6 max-w-4xl">
+  <div class="container mx-auto p-4 sm:p-6 max-w-4xl">
     <h1 class="text-3xl font-bold mb-8">Settings</h1>
 
-    <section class="bg-white rounded-lg shadow-lg p-6">
-      <div class="flex justify-between items-center mb-6">
+    <section class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+      <div class="flex flex-wrap justify-between items-center gap-2 mb-6">
         <h2 class="text-2xl font-semibold">Recipe Categories</h2>
         <button
           @click="showAddCategoryModal = true"
@@ -126,17 +126,17 @@ function cancelEdit() {
         <div
           v-for="category in categories"
           :key="category.id"
-          class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-          <div class="flex items-center gap-4">
+          class="flex items-center justify-between gap-2 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+          <div class="flex items-center gap-2 sm:gap-4 min-w-0">
             <div
               class="w-8 h-8 rounded-full flex-shrink-0"
               :style="{ backgroundColor: category.color || '#6B7280' }"></div>
-            <div>
-              <span class="font-medium text-lg">{{ category.name }}</span>
-              <span class="text-gray-500 text-sm ml-2">({{ category.recipeCount }} recipes)</span>
+            <div class="min-w-0">
+              <span class="font-medium text-lg block truncate">{{ category.name }}</span>
+              <span class="text-gray-500 text-sm">({{ category.recipeCount }} recipes)</span>
             </div>
           </div>
-          <div class="flex gap-2">
+          <div class="flex gap-2 flex-shrink-0">
             <button
               @click="initiateEdit(category)"
               class="text-blue-600 hover:text-blue-800 font-medium px-3 py-1 rounded hover:bg-blue-50 transition-colors">
