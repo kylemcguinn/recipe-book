@@ -27,8 +27,12 @@ A full-stack recipe management application that allows you to import, store, and
 - **Swiper** - Touch-enabled slider/carousel
 
 ### Infrastructure
-- **Docker & Docker Compose** - Containerization and orchestration
-- **MongoDB** - Persistent database storage
+- **Docker & Docker Compose** - Containerization and local orchestration
+- **MongoDB Atlas** - Managed cloud database (free tier)
+- **Azure Container Apps** - Serverless container hosting with scale-to-zero
+- **Azure Container Registry** - Private Docker image registry
+- **Terraform** - Infrastructure as code for Azure resources
+- **GitHub Actions** - CI/CD pipeline for automated deployments
 
 ## Project Structure
 
@@ -51,6 +55,17 @@ recipe-book/
 │   └── public/              # Static assets
 ├── docker-compose.yml       # Docker orchestration
 ├── docker-compose.override.yml  # Development overrides
+├── infra/                   # Terraform infrastructure definitions
+│   ├── main.tf              # Provider config and resource group
+│   ├── variables.tf         # Input variables
+│   ├── outputs.tf           # Output values (URLs, registry server)
+│   ├── acr.tf               # Azure Container Registry
+│   ├── container_apps.tf    # Container App Environment and apps
+│   ├── identity.tf          # Managed identity and role assignments
+│   └── monitoring.tf        # Log Analytics workspace
+├── .github/
+│   └── workflows/
+│       └── deploy.yml       # CI/CD pipeline
 └── .vscode/                 # VS Code debug configurations
 ```
 
@@ -355,6 +370,126 @@ docker-compose build recipebook.api
 
 # Restart a service
 docker-compose restart recipebook.api
+```
+
+## Cloud Deployment
+
+The application is hosted on Azure using Container Apps with MongoDB Atlas as the database. Infrastructure is managed with Terraform and deployments are automated via GitHub Actions.
+
+### Architecture
+
+- **MongoDB Atlas** (free tier) — managed database, no infrastructure to maintain
+- **Azure Container Registry** (Basic SKU, ~$5/month) — stores Docker images
+- **Azure Container Apps** (Consumption plan) — hosts the API and frontend with scale-to-zero (effectively free for personal use)
+- **GitHub Actions** — builds images and deploys on every push to `master`
+
+### Prerequisites
+
+- [Terraform CLI](https://developer.hashicorp.com/terraform/install)
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+- An Azure subscription
+- A [MongoDB Atlas](https://www.mongodb.com/atlas) account with a free cluster
+
+### Provisioning Infrastructure (First Time)
+
+**1. Create your `terraform.tfvars` file:**
+
+```bash
+cd infra
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Edit `terraform.tfvars` and fill in your values:
+
+```hcl
+subscription_id           = "00000000-0000-0000-0000-000000000000"
+acr_name                  = "yourregistryname"   # must be globally unique
+mongodb_connection_string = "mongodb+srv://<user>:<password>@<cluster>.mongodb.net/RecipeBook"
+```
+
+**2. Log in to Azure and apply:**
+
+```bash
+az login
+terraform init
+terraform plan
+terraform apply
+```
+
+Note the `api_url` and `frontend_url` from the output — you'll need these for GitHub secrets.
+
+**3. Create a service principal for GitHub Actions:**
+
+```bash
+az ad sp create-for-rbac --name "recipe-book-github-actions" --role Contributor --scopes /subscriptions/<sub-id>/resourceGroups/recipe-book-rg --json-auth
+```
+
+Assign the AcrPush role so the pipeline can push images:
+
+```bash
+az role assignment create --assignee <appId> --scope $(az acr show --name <acr-name> --query id --output tsv) --role acrpush
+```
+
+Configure the service principal for OIDC (passwordless) authentication with GitHub:
+
+```bash
+az ad app federated-credential create --id <appId> --parameters '{
+  "name": "recipe-book-github-actions",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:<your-github-username>/<your-repo-name>:ref:refs/heads/master",
+  "audiences": ["api://AzureADTokenExchange"]
+}'
+```
+
+**4. Set GitHub repository secrets:**
+
+| Secret | Value |
+|---|---|
+| `AZURE_CLIENT_ID` | Service principal `clientId` |
+| `AZURE_TENANT_ID` | Your Azure tenant ID |
+| `AZURE_SUBSCRIPTION_ID` | Your Azure subscription ID |
+| `ACR_NAME` | ACR name (e.g. `yourregistryname`) |
+| `ACR_LOGIN_SERVER` | ACR login server (e.g. `yourregistryname.azurecr.io`) |
+| `API_BASE_URL` | `api_url` output from Terraform (stable ingress URL) |
+| `RESOURCE_GROUP` | `recipe-book-rg` |
+| `API_CONTAINER_APP_NAME` | `recipe-book-api` |
+| `WEB_CONTAINER_APP_NAME` | `recipe-book-web` |
+
+### CI/CD Pipeline
+
+The `.github/workflows/deploy.yml` workflow runs on every push to `master`:
+
+1. Authenticates to Azure via OIDC (no stored credentials)
+2. Builds the API Docker image and pushes it to ACR tagged with the commit SHA
+3. Builds the frontend Docker image with `VITE_API_BASE_URL` baked in, pushes to ACR
+4. Updates the API Container App to use the new image
+5. Updates the frontend Container App to use the new image
+
+You can also trigger a deployment manually via **Actions → Build and Deploy → Run workflow**.
+
+### Scale-to-Zero
+
+Both Container Apps are configured with `min_replicas = 0`. When idle they scale down to zero and incur no compute cost. The first request after a period of inactivity will have a ~10-30 second cold start delay while the container spins up.
+
+To keep an app always warm, change `min_replicas` to `1` in [infra/container_apps.tf](infra/container_apps.tf) (adds ~$3-4/month per app).
+
+### Useful Commands
+
+```bash
+# Get deployed URLs
+cd infra && terraform output
+
+# Get API URL directly
+az containerapp show --name recipe-book-api --resource-group recipe-book-rg --query "properties.configuration.ingress.fqdn" --output tsv
+
+# View API logs
+az containerapp logs show --name recipe-book-api --resource-group recipe-book-rg --follow false
+
+# View revision status
+az containerapp revision list --name recipe-book-api --resource-group recipe-book-rg --output table
+
+# Tear down all Azure resources
+cd infra && terraform destroy
 ```
 
 ## Troubleshooting
