@@ -15,7 +15,7 @@ import TheHeader from './components/core/TheHeader.vue'
 
   <TheHeader />
 
-  <main class="mx-auto max-w-screen-xl h-screen px-4 md:px-0">
+  <main class="mx-auto max-w-screen-xl min-h-screen px-4 md:px-0">
     <!-- <TheWelcome /> -->
     <RouterView />
   </main>

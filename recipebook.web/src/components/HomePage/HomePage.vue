@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RecipeCard, RecipeContainer } from '@/models/recipe';
 import type { Category } from '@/models/category';
-import { onMounted, ref, computed, watch } from 'vue'
+import { onMounted, ref, computed, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router';
 import RecipeCardTemplate from '../RecipesPage/RecipesCard.vue'
 import RecipesAddFab from '../RecipesPage/RecipesAddFab.vue';
@@ -32,6 +32,20 @@ const showErrorAlert = ref(false);
 const errorMessage = ref('');
 const selectedRecipe = ref<RecipeContainer | null>(null);
 const selectedCarousel = ref<string | null>(null); // Track which carousel was selected
+// Scroll the details panel into view after it renders.
+function scrollToDetails() {
+  nextTick(() => nextTick(() => {
+    setTimeout(() => {
+      const el = document.querySelector<HTMLElement>('[data-details]');
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      // Scroll so the top of the details panel sits ~35% down the viewport,
+      // keeping the carousel above it partially visible.
+      const top = window.scrollY + rect.top - window.innerHeight * 0.35;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }, 50);
+  }));
+}
 
 // Peek offset in pixels — matches the right-side peek gap left by the 74% slide width.
 const PEEK_PX = Math.round(window.innerWidth * 0.13);
@@ -254,6 +268,7 @@ function selectCard(categoryName: string | null, recipe: RecipeContainer) {
     recipeToSelect.isSelected = true;
     selectedRecipe.value = recipeToSelect;
     selectedCarousel.value = categoryName === null ? 'all' : categoryName;
+    scrollToDetails();
   }
 }
 
@@ -366,10 +381,11 @@ async function confirmDelete() {
         </div>
 
         <!-- Show recipe details if selected from "All Recipes" carousel -->
-        <RecipeDetailsView
-          v-if="selectedCarousel === 'all' && selectedRecipe"
-          :recipe="selectedRecipe"
-          @categories-updated="loadRecipes" />
+        <div v-if="selectedCarousel === 'all' && selectedRecipe" data-details>
+          <RecipeDetailsView
+            :recipe="selectedRecipe"
+            @categories-updated="loadRecipes" />
+        </div>
       </template>
     </div>
 
@@ -411,10 +427,11 @@ async function confirmDelete() {
       </div>
 
       <!-- Show recipe details if selected from this category carousel -->
-      <RecipeDetailsView
-        v-if="selectedCarousel === categoryName && selectedRecipe"
-        :recipe="selectedRecipe"
-        @categories-updated="loadRecipes" />
+      <div v-if="selectedCarousel === categoryName && selectedRecipe" data-details>
+        <RecipeDetailsView
+          :recipe="selectedRecipe"
+          @categories-updated="loadRecipes" />
+      </div>
     </div>
 
     <!-- Loading overlay for recipe import -->

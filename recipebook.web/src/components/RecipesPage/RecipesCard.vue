@@ -15,7 +15,7 @@ function handleDeleteClick(event: MouseEvent) {
 
 </script>
 <template>
-    <a href="#" @click="$emit('recipeClicked')" :class="{'selected': props.recipe.isSelected}" class="group relative block bg-black">
+    <a href="#" @click.prevent="$emit('recipeClicked')" :class="{'selected': props.recipe.isSelected}" class="group relative block bg-black">
         <img alt=""
             :src="props.recipe?.recipeCard.image[0].url"
             class="absolute inset-0 h-full w-full object-cover opacity-75 transition-opacity group-hover:opacity-50" />
