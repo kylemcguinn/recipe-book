@@ -306,28 +306,30 @@ async function confirmDelete() {
 
       <!-- Recipe carousel (show only if has results or no search) -->
       <template v-else>
-        <swiper
-          :slidesPerView="'auto'"
-          :spaceBetween="30"
-          :loop="false"
-          :navigation="true"
-          :mousewheel="true"
-          :keyboard="{ enabled: true }"
-          :modules="[Navigation, Keyboard, Mousewheel]"
-          class="mySwiper">
+        <div class="carousel-wrapper">
+          <swiper
+            :slidesPerView="'auto'"
+            :spaceBetween="30"
+            :loop="false"
+            :navigation="true"
+            :mousewheel="true"
+            :keyboard="{ enabled: true }"
+            :modules="[Navigation, Keyboard, Mousewheel]"
+            class="mySwiper">
 
-          <!-- All recipe cards -->
-          <swiper-slide
-            v-for="recipe in filteredAllRecipes"
-            :key="recipe.recipeCard.id"
-            class="w-full md:w-52">
-            <RecipeCardTemplate
-              :recipe="recipe"
-              @recipe-clicked="selectCard(null, recipe)"
-              @delete-recipe="initiateDelete">
-            </RecipeCardTemplate>
-          </swiper-slide>
-        </swiper>
+            <!-- All recipe cards -->
+            <swiper-slide
+              v-for="recipe in filteredAllRecipes"
+              :key="recipe.recipeCard.id"
+              class="w-full md:w-52">
+              <RecipeCardTemplate
+                :recipe="recipe"
+                @recipe-clicked="selectCard(null, recipe)"
+                @delete-recipe="initiateDelete">
+              </RecipeCardTemplate>
+            </swiper-slide>
+          </swiper>
+        </div>
 
         <!-- Show recipe details if selected from "All Recipes" carousel -->
         <RecipeDetailsView
@@ -349,27 +351,29 @@ async function confirmDelete() {
         </span>
       </h2>
 
-      <swiper
-        :slidesPerView="'auto'"
-        :spaceBetween="30"
-        :loop="false"
-        :navigation="true"
-        :mousewheel="true"
-        :keyboard="{ enabled: true }"
-        :modules="[Navigation, Keyboard, Mousewheel]"
-        class="mySwiper">
+      <div class="carousel-wrapper">
+        <swiper
+          :slidesPerView="'auto'"
+          :spaceBetween="30"
+          :loop="false"
+          :navigation="true"
+          :mousewheel="true"
+          :keyboard="{ enabled: true }"
+          :modules="[Navigation, Keyboard, Mousewheel]"
+          class="mySwiper">
 
-        <swiper-slide
-          v-for="recipe in filteredRecipesByCategory[categoryName]"
-          :key="recipe.recipeCard.id"
-          class="w-full md:w-52">
-          <RecipeCardTemplate
-            :recipe="recipe"
-            @recipe-clicked="selectCard(categoryName, recipe)"
-            @delete-recipe="initiateDelete">
-          </RecipeCardTemplate>
-        </swiper-slide>
-      </swiper>
+          <swiper-slide
+            v-for="recipe in filteredRecipesByCategory[categoryName]"
+            :key="recipe.recipeCard.id"
+            class="w-full md:w-52">
+            <RecipeCardTemplate
+              :recipe="recipe"
+              @recipe-clicked="selectCard(categoryName, recipe)"
+              @delete-recipe="initiateDelete">
+            </RecipeCardTemplate>
+          </swiper-slide>
+        </swiper>
+      </div>
 
       <!-- Show recipe details if selected from this category carousel -->
       <RecipeDetailsView
@@ -433,6 +437,24 @@ async function confirmDelete() {
   :deep(.swiper-button-prev),
   :deep(.swiper-button-next) {
     display: none;
+  }
+
+  /* Clip overflow at the wrapper so only the peeking edge of the next card
+     is visible — distant slides remain hidden beyond the wrapper bounds. */
+  .carousel-wrapper {
+    overflow: hidden;
+  }
+
+  /* Allow Swiper to overflow its own bounds so the next card can peek in
+     from the right. The wrapper above handles the actual viewport clipping. */
+  :deep(.mySwiper) {
+    overflow: visible;
+  }
+
+  /* Slides take ~82% of the viewport width, leaving enough room for the
+     30px inter-card gap plus ~10-12% of the next card's edge to peek in. */
+  .swiper-slide {
+    width: 82%;
   }
 }
 </style>
