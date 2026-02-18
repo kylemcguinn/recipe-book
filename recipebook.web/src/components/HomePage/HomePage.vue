@@ -33,8 +33,8 @@ const errorMessage = ref('');
 const selectedRecipe = ref<RecipeContainer | null>(null);
 const selectedCarousel = ref<string | null>(null); // Track which carousel was selected
 
-// Peek offset in pixels — ~9% of the viewport width, matching the right-side peek.
-const PEEK_PX = Math.round(window.innerWidth * 0.09);
+// Peek offset in pixels — matches the right-side peek gap left by the 74% slide width.
+const PEEK_PX = Math.round(window.innerWidth * 0.13);
 
 function onSwiperInit(swiper: SwiperType) {
   // Only apply left-peek behavior on mobile (< 768px).
@@ -478,10 +478,10 @@ async function confirmDelete() {
     overflow: visible;
   }
 
-  /* Slides take ~82% of the viewport width, leaving enough room for the
-     30px inter-card gap plus ~10-12% of the next card's edge to peek in. */
+  /* Slides take ~74% of the viewport width, leaving ~13% on each side for
+     the adjacent cards to peek in (accounting for the 30px inter-card gap). */
   .swiper-slide {
-    width: 82%;
+    width: 74%;
   }
 }
 </style>
