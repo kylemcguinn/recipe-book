@@ -15,12 +15,12 @@ output "container_app_environment_id" {
 
 output "api_url" {
   description = "Public URL of the API Container App"
-  value       = "https://${azurerm_container_app.api.latest_revision_fqdn}"
+  value       = "https://${azurerm_container_app.api.ingress[0].fqdn}"
 }
 
 output "frontend_url" {
   description = "Public URL of the frontend Container App"
-  value       = "https://${azurerm_container_app.frontend.latest_revision_fqdn}"
+  value       = "https://${azurerm_container_app.frontend.ingress[0].fqdn}"
 }
 
 output "managed_identity_client_id" {
