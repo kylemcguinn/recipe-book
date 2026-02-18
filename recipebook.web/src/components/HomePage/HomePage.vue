@@ -33,16 +33,20 @@ const errorMessage = ref('');
 const selectedRecipe = ref<RecipeContainer | null>(null);
 const selectedCarousel = ref<string | null>(null); // Track which carousel was selected
 
-// Track which carousels have scrolled past the first card (for left-peek effect).
-// Keys are carousel IDs ('all' or category name); value is true when not at start.
-const carouselScrolled = ref<Record<string, boolean>>({});
+// Peek offset in pixels — ~9% of the viewport width, matching the right-side peek.
+const PEEK_PX = Math.round(window.innerWidth * 0.09);
 
-function onSwiperInit(carouselId: string, swiper: SwiperType) {
+function onSwiperInit(swiper: SwiperType) {
   // Only apply left-peek behavior on mobile (< 768px).
   if (window.innerWidth >= 768) return;
 
   swiper.on('progress', () => {
-    carouselScrolled.value[carouselId] = swiper.progress > 0;
+    const isScrolled = swiper.progress > 0;
+
+    // Shift all slides right by PEEK_PX when not at the first card so the
+    // previous card's edge is visible on the left without clipping the active card.
+    swiper.params.slidesOffsetBefore = isScrolled ? PEEK_PX : 0;
+    swiper.update();
   });
 }
 
@@ -329,8 +333,7 @@ async function confirmDelete() {
             :keyboard="{ enabled: true }"
             :modules="[Navigation, Keyboard, Mousewheel]"
             class="mySwiper"
-            :class="{ 'swiper-left-peeked': carouselScrolled['all'] }"
-            @swiper="(swiper: SwiperType) => onSwiperInit('all', swiper)">
+            @swiper="(swiper: SwiperType) => onSwiperInit(swiper)">
 
             <!-- All recipe cards -->
             <swiper-slide
@@ -376,8 +379,7 @@ async function confirmDelete() {
           :keyboard="{ enabled: true }"
           :modules="[Navigation, Keyboard, Mousewheel]"
           class="mySwiper"
-          :class="{ 'swiper-left-peeked': carouselScrolled[categoryName] }"
-          @swiper="(swiper: SwiperType) => onSwiperInit(categoryName, swiper)">
+          @swiper="(swiper: SwiperType) => onSwiperInit(swiper)">
 
           <swiper-slide
             v-for="recipe in filteredRecipesByCategory[categoryName]"
@@ -466,16 +468,6 @@ async function confirmDelete() {
      peek in from either side. The wrapper above handles viewport clipping. */
   :deep(.mySwiper) {
     overflow: visible;
-    /* Smooth transition when the left-peek offset is applied/removed. */
-    transition: margin-left 0.2s ease, width 0.2s ease;
-  }
-
-  /* When not at the first card, shift the Swiper left and narrow its width
-     by the same peek amount so the previous card's edge shows on the left
-     while the wrapper still clips the far edges. */
-  :deep(.mySwiper.swiper-left-peeked) {
-    margin-left: -9%;
-    width: calc(100% + 9%);
   }
 
   /* Slides take ~82% of the viewport width, leaving enough room for the
