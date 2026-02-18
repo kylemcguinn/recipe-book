@@ -32,6 +32,39 @@ const showErrorAlert = ref(false);
 const errorMessage = ref('');
 const selectedRecipe = ref<RecipeContainer | null>(null);
 const selectedCarousel = ref<string | null>(null); // Track which carousel was selected
+// Accordion transition hooks — animate height from 0 to auto and back.
+function onDetailsEnter(el: Element, done: () => void) {
+  const htmlEl = el as HTMLElement;
+  htmlEl.style.height = '0';
+  htmlEl.style.opacity = '0';
+  htmlEl.style.overflow = 'hidden';
+  requestAnimationFrame(() => {
+    htmlEl.style.transition = 'height 0.35s ease, opacity 0.35s ease';
+    htmlEl.style.height = htmlEl.scrollHeight + 'px';
+    htmlEl.style.opacity = '1';
+    htmlEl.addEventListener('transitionend', done, { once: true });
+  });
+}
+
+function onDetailsAfterEnter(el: Element) {
+  const htmlEl = el as HTMLElement;
+  htmlEl.style.height = '';
+  htmlEl.style.overflow = '';
+  htmlEl.style.transition = '';
+}
+
+function onDetailsLeave(el: Element, done: () => void) {
+  const htmlEl = el as HTMLElement;
+  htmlEl.style.height = htmlEl.scrollHeight + 'px';
+  htmlEl.style.overflow = 'hidden';
+  requestAnimationFrame(() => {
+    htmlEl.style.transition = 'height 1s ease, opacity 1s ease';
+    htmlEl.style.height = '0';
+    htmlEl.style.opacity = '0';
+    htmlEl.addEventListener('transitionend', done, { once: true });
+  });
+}
+
 // Scroll the details panel into view after it renders.
 function scrollToDetails() {
   nextTick(() => nextTick(() => {
@@ -381,11 +414,17 @@ async function confirmDelete() {
         </div>
 
         <!-- Show recipe details if selected from "All Recipes" carousel -->
-        <div v-if="selectedCarousel === 'all' && selectedRecipe" data-details>
-          <RecipeDetailsView
-            :recipe="selectedRecipe"
-            @categories-updated="loadRecipes" />
-        </div>
+        <Transition
+          :css="false"
+          @enter="onDetailsEnter"
+          @after-enter="onDetailsAfterEnter"
+          @leave="onDetailsLeave">
+          <div v-if="selectedCarousel === 'all' && selectedRecipe" data-details>
+            <RecipeDetailsView
+              :recipe="selectedRecipe"
+              @categories-updated="loadRecipes" />
+          </div>
+        </Transition>
       </template>
     </div>
 
@@ -427,11 +466,17 @@ async function confirmDelete() {
       </div>
 
       <!-- Show recipe details if selected from this category carousel -->
-      <div v-if="selectedCarousel === categoryName && selectedRecipe" data-details>
-        <RecipeDetailsView
-          :recipe="selectedRecipe"
-          @categories-updated="loadRecipes" />
-      </div>
+      <Transition
+        :css="false"
+        @enter="onDetailsEnter"
+        @after-enter="onDetailsAfterEnter"
+        @leave="onDetailsLeave">
+        <div v-if="selectedCarousel === categoryName && selectedRecipe" data-details>
+          <RecipeDetailsView
+            :recipe="selectedRecipe"
+            @categories-updated="loadRecipes" />
+        </div>
+      </Transition>
     </div>
 
     <!-- Loading overlay for recipe import -->
@@ -479,6 +524,7 @@ async function confirmDelete() {
 </template>
 
 <style scoped>
+
 @media (min-width: 768px) {
   .swiper-slide {
     width: 13rem;
