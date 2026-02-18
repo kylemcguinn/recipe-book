@@ -13,9 +13,9 @@ import RecipesDeleteSuccessAlert from '../RecipesPage/RecipesDeleteSuccessAlert.
 import RecipeDetailsView from '../RecipesPage/RecipeDetailsView.vue';
 import { API_ENDPOINTS } from '@/config/api';
 
-
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Navigation, Keyboard, Mousewheel } from 'swiper/modules';
+import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
@@ -32,6 +32,19 @@ const showErrorAlert = ref(false);
 const errorMessage = ref('');
 const selectedRecipe = ref<RecipeContainer | null>(null);
 const selectedCarousel = ref<string | null>(null); // Track which carousel was selected
+
+// Track which carousels have scrolled past the first card (for left-peek effect).
+// Keys are carousel IDs ('all' or category name); value is true when not at start.
+const carouselScrolled = ref<Record<string, boolean>>({});
+
+function onSwiperInit(carouselId: string, swiper: SwiperType) {
+  // Only apply left-peek behavior on mobile (< 768px).
+  if (window.innerWidth >= 768) return;
+
+  swiper.on('progress', () => {
+    carouselScrolled.value[carouselId] = swiper.progress > 0;
+  });
+}
 
 // Delete state
 const showDeleteConfirmModal = ref(false);
@@ -315,7 +328,9 @@ async function confirmDelete() {
             :mousewheel="true"
             :keyboard="{ enabled: true }"
             :modules="[Navigation, Keyboard, Mousewheel]"
-            class="mySwiper">
+            class="mySwiper"
+            :class="{ 'swiper-left-peeked': carouselScrolled['all'] }"
+            @swiper="(swiper: SwiperType) => onSwiperInit('all', swiper)">
 
             <!-- All recipe cards -->
             <swiper-slide
@@ -360,7 +375,9 @@ async function confirmDelete() {
           :mousewheel="true"
           :keyboard="{ enabled: true }"
           :modules="[Navigation, Keyboard, Mousewheel]"
-          class="mySwiper">
+          class="mySwiper"
+          :class="{ 'swiper-left-peeked': carouselScrolled[categoryName] }"
+          @swiper="(swiper: SwiperType) => onSwiperInit(categoryName, swiper)">
 
           <swiper-slide
             v-for="recipe in filteredRecipesByCategory[categoryName]"
@@ -445,10 +462,20 @@ async function confirmDelete() {
     overflow: hidden;
   }
 
-  /* Allow Swiper to overflow its own bounds so the next card can peek in
-     from the right. The wrapper above handles the actual viewport clipping. */
+  /* Allow Swiper to overflow its own bounds so the next/previous card can
+     peek in from either side. The wrapper above handles viewport clipping. */
   :deep(.mySwiper) {
     overflow: visible;
+    /* Smooth transition when the left-peek offset is applied/removed. */
+    transition: margin-left 0.2s ease, width 0.2s ease;
+  }
+
+  /* When not at the first card, shift the Swiper left and narrow its width
+     by the same peek amount so the previous card's edge shows on the left
+     while the wrapper still clips the far edges. */
+  :deep(.mySwiper.swiper-left-peeked) {
+    margin-left: -9%;
+    width: calc(100% + 9%);
   }
 
   /* Slides take ~82% of the viewport width, leaving enough room for the
