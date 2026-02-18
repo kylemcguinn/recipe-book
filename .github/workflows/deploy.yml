@@ -67,18 +67,18 @@ jobs:
       # Deploy API Container App
       # -------------------------------------------------------------------------
       - name: Deploy API to Azure Container Apps
-        uses: azure/container-apps-update-and-deploy-action@v1
-        with:
-          resource-group: ${{ secrets.RESOURCE_GROUP }}
-          name: ${{ secrets.API_CONTAINER_APP_NAME }}
-          image: ${{ env.ACR_LOGIN_SERVER }}/${{ env.API_IMAGE }}:${{ github.sha }}
+        run: |
+          az containerapp update \
+            --name ${{ secrets.API_CONTAINER_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --image ${{ env.ACR_LOGIN_SERVER }}/${{ env.API_IMAGE }}:${{ github.sha }}
 
       # -------------------------------------------------------------------------
       # Deploy frontend Container App
       # -------------------------------------------------------------------------
       - name: Deploy frontend to Azure Container Apps
-        uses: azure/container-apps-update-and-deploy-action@v1
-        with:
-          resource-group: ${{ secrets.RESOURCE_GROUP }}
-          name: ${{ secrets.WEB_CONTAINER_APP_NAME }}
-          image: ${{ env.ACR_LOGIN_SERVER }}/${{ env.WEB_IMAGE }}:${{ github.sha }}
+        run: |
+          az containerapp update \
+            --name ${{ secrets.WEB_CONTAINER_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --image ${{ env.ACR_LOGIN_SERVER }}/${{ env.WEB_IMAGE }}:${{ github.sha }}
