@@ -405,3 +405,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Recipe data sourced from websites implementing [Schema.org Recipe](https://schema.org/Recipe) markup
 - Built with modern web technologies and best practices
+
