@@ -7,8 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Recipe-Book is a full-stack recipe management application with:
 - **Backend**: ASP.NET Core 10 Web API (C#)
 - **Frontend**: Vue 3 + TypeScript + Vite + Tailwind CSS
-- **Database**: MongoDB (NoSQL)
+- **Database**: MongoDB Atlas (cloud-hosted, free tier)
 - **Architecture**: Layered architecture with repository pattern
+- **Hosting**: Azure Container Apps (consumption plan, scale-to-zero)
+- **IaC**: Terraform (`infra/`)
+- **CI/CD**: GitHub Actions (`.github/workflows/deploy.yml`)
 
 ## Project Structure
 
@@ -17,6 +20,16 @@ recipe-book/
 ├── RecipeBook.Api/           # ASP.NET Core 10 REST API
 ├── RecipeBook.Data/          # Data access layer with MongoDB persistence
 ├── recipebook.web/           # Vue 3 frontend
+├── infra/                    # Terraform infrastructure (Azure)
+│   ├── main.tf               # Provider config and resource group
+│   ├── variables.tf          # Input variables
+│   ├── outputs.tf            # Output values (URLs, registry server)
+│   ├── acr.tf                # Azure Container Registry (Basic SKU)
+│   ├── container_apps.tf     # Container App Environment + API + frontend apps
+│   ├── identity.tf           # Managed identity and AcrPull role assignment
+│   └── monitoring.tf         # Log Analytics workspace
+├── .github/workflows/
+│   └── deploy.yml            # CI/CD: build → push to ACR → deploy to Container Apps
 ├── docker-compose.yml        # Docker orchestration
 └── docker-compose.override.yml  # Development overrides
 ```
@@ -69,6 +82,38 @@ docker-compose up --build
 
 # Stop all services
 docker-compose down
+```
+
+### Terraform (infra/)
+
+```bash
+cd infra
+
+# Initialise providers (first time)
+terraform init
+
+# Preview changes
+terraform plan
+
+# Apply infrastructure changes
+terraform apply
+
+# Show deployed URLs
+terraform output
+
+# Tear down all Azure resources
+terraform destroy
+```
+
+### Deployment
+
+Deployments are triggered automatically on every push to `master`. To trigger manually:
+- Go to **Actions → Build and Deploy to Azure Container Apps → Run workflow**
+
+To check deployment status via CLI:
+```bash
+az containerapp revision list --name recipe-book-api --resource-group recipe-book-rg --output table
+az containerapp logs show --name recipe-book-api --resource-group recipe-book-rg --follow false
 ```
 
 ## Architecture Overview
