@@ -5,7 +5,7 @@ import RecipesAddImportInput from './RecipesAddImportInput.vue';
 const urlText = ref("");
 </script>
 <template>
-    <div class="rounded-2xl border border-blue-100 bg-white p-4 shadow-lg sm:p-6 lg:p-8 absolute z-50 top-32 -translate-x-1/2 left-1/2"
+    <div class="rounded-2xl border border-blue-100 bg-white p-4 shadow-lg sm:p-6 lg:p-8 absolute z-50 top-32 -translate-x-1/2 left-1/2 w-[calc(100%-2rem)] sm:w-auto"
         role="alert">
         <div class="flex items-center gap-4">
             <span class="shrink-0 rounded-full bg-blue-400 p-2 text-white">
