@@ -26,6 +26,7 @@ const recipesByCategory = ref<Record<string, RecipeContainer[]>>({});
 const categoryOrder = ref<string[]>([]);
 const categoryColors = ref<Record<string, string>>({});
 const showAddNewModal = ref(false);
+const isImporting = ref(false);
 const showSuccessAlert = ref(false);
 const showErrorAlert = ref(false);
 const errorMessage = ref('');
@@ -179,6 +180,7 @@ watch([filteredAllRecipes, currentSearch], () => {
 
 function importRecipe(recipeUrl: string) {
   showAddNewModal.value = false;
+  isImporting.value = true;
 
   const encodedUrl = encodeURI(recipeUrl);
 
@@ -200,6 +202,9 @@ function importRecipe(recipeUrl: string) {
       console.error(err);
       errorMessage.value = err.message || 'Failed to import recipe. Please try again.';
       showErrorAlert.value = true;
+    })
+    .finally(() => {
+      isImporting.value = false;
     });
 }
 
@@ -376,6 +381,14 @@ async function confirmDelete() {
         v-if="selectedCarousel === categoryName && selectedRecipe"
         :recipe="selectedRecipe"
         @categories-updated="loadRecipes" />
+    </div>
+
+    <!-- Loading overlay for recipe import -->
+    <div v-if="isImporting" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        <p class="text-gray-700 font-medium">Importing recipe...</p>
+      </div>
     </div>
 
     <!-- Modals and alerts -->
