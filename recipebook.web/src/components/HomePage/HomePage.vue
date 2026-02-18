@@ -40,14 +40,22 @@ function onSwiperInit(swiper: SwiperType) {
   // Only apply left-peek behavior on mobile (< 768px).
   if (window.innerWidth >= 768) return;
 
-  swiper.on('progress', () => {
-    const isScrolled = swiper.progress > 0;
+  function applyLeftPeek() {
+    const isScrolled = swiper.activeIndex > 0;
+    const current = swiper.params.slidesOffsetBefore as number;
+    const next = isScrolled ? PEEK_PX : 0;
 
-    // Shift all slides right by PEEK_PX when not at the first card so the
-    // previous card's edge is visible on the left without clipping the active card.
-    swiper.params.slidesOffsetBefore = isScrolled ? PEEK_PX : 0;
-    swiper.update();
-  });
+    // Only call update when the offset actually needs to change.
+    // slideChange only fires after a swipe settles, so it is safe to
+    // update geometry here without interfering with active touch gestures.
+    if (current !== next) {
+      swiper.params.slidesOffsetBefore = next;
+      swiper.update();
+    }
+  }
+
+  // slideChange fires after a swipe settles — safe to update geometry here.
+  swiper.on('slideChange', applyLeftPeek);
 }
 
 // Delete state
