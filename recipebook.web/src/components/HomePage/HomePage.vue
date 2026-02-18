@@ -234,6 +234,14 @@ function importRecipe(recipeUrl: string) {
 }
 
 function selectCard(categoryName: string | null, recipe: RecipeContainer) {
+  // If the clicked card is already selected, deselect it to close the details view.
+  if (selectedRecipe.value?.recipeCard.id === recipe.recipeCard.id) {
+    recipe.isSelected = false;
+    selectedRecipe.value = null;
+    selectedCarousel.value = null;
+    return;
+  }
+
   // Deselect all recipes in all categories
   allRecipes.value.forEach(r => r.isSelected = false);
 
