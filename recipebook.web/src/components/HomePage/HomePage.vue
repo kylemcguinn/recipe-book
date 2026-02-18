@@ -4,7 +4,7 @@ import type { Category } from '@/models/category';
 import { onMounted, ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import RecipeCardTemplate from '../RecipesPage/RecipesCard.vue'
-import RecipesAddCard from '../RecipesPage/RecipesAddCard.vue';
+import RecipesAddFab from '../RecipesPage/RecipesAddFab.vue';
 import RecipesAddNewModal from '../RecipesPage/RecipesAddNewModal.vue';
 import RecipesAddSuccessAlert from '../RecipesPage/RecipesAddSuccessAlert.vue';
 import RecipesAddErrorAlert from '../RecipesPage/RecipesAddErrorAlert.vue';
@@ -306,11 +306,6 @@ async function confirmDelete() {
 
       <!-- Recipe carousel (show only if has results or no search) -->
       <template v-else>
-        <!-- Add Recipe Button - full width on mobile, floated on larger screens -->
-        <div class="mb-4 md:mb-0 md:float-left md:mr-12">
-          <RecipesAddCard @add-recipe="showAddNewModal = true" />
-        </div>
-
         <swiper
           :slidesPerView="'auto'"
           :spaceBetween="30"
@@ -421,6 +416,9 @@ async function confirmDelete() {
       @dismiss-alert="showDeleteSuccessAlert = false"
       title="Recipe deleted"
       :body="deleteSuccessMessage" />
+
+    <!-- Floating Action Button -->
+    <RecipesAddFab @add-recipe="showAddNewModal = true" />
   </div>
 </template>
 
