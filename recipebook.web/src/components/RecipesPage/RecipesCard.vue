@@ -30,7 +30,7 @@ function handleDeleteClick(event: MouseEvent) {
             </svg>
         </button>
 
-        <div class="relative p-2 sm:p-4 lg:p-6 w-52 h-60">
+        <div class="relative p-2 sm:p-4 lg:p-6 w-full md:w-52 h-60">
             <p class="text-xl font-bold text-white line-clamp-2 h-14">{{ props.recipe == null ? null : props.recipe.recipeCard.name }}</p>
 
             <div class="">

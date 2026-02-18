@@ -325,7 +325,7 @@ async function confirmDelete() {
           <swiper-slide
             v-for="recipe in filteredAllRecipes"
             :key="recipe.recipeCard.id"
-            class="w-52">
+            class="w-full md:w-52">
             <RecipeCardTemplate
               :recipe="recipe"
               @recipe-clicked="selectCard(null, recipe)"
@@ -367,7 +367,7 @@ async function confirmDelete() {
         <swiper-slide
           v-for="recipe in filteredRecipesByCategory[categoryName]"
           :key="recipe.recipeCard.id"
-          class="w-52">
+          class="w-full md:w-52">
           <RecipeCardTemplate
             :recipe="recipe"
             @recipe-clicked="selectCard(categoryName, recipe)"
@@ -425,7 +425,16 @@ async function confirmDelete() {
 </template>
 
 <style scoped>
-.swiper-slide {
-  width: 13rem;
+@media (min-width: 768px) {
+  .swiper-slide {
+    width: 13rem;
+  }
+}
+
+@media (max-width: 767px) {
+  :deep(.swiper-button-prev),
+  :deep(.swiper-button-next) {
+    display: none;
+  }
 }
 </style>
