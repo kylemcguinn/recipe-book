@@ -483,5 +483,15 @@ async function confirmDelete() {
   .swiper-slide {
     width: 74%;
   }
+
+  /* Blur and dim slides that are out of view to draw focus to the active card. */
+  :deep(.swiper-slide) {
+    filter: blur(2px) brightness(0.75);
+    transition: filter 0.3s ease;
+  }
+
+  :deep(.swiper-slide-active) {
+    filter: none;
+  }
 }
 </style>
