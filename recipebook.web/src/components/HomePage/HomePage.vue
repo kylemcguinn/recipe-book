@@ -11,6 +11,7 @@ import RecipesAddErrorAlert from '../RecipesPage/RecipesAddErrorAlert.vue';
 import RecipesDeleteConfirmModal from '../RecipesPage/RecipesDeleteConfirmModal.vue';
 import RecipesDeleteSuccessAlert from '../RecipesPage/RecipesDeleteSuccessAlert.vue';
 import RecipeDetailsView from '../RecipesPage/RecipeDetailsView.vue';
+import RecipesImportCategoryModal from '../RecipesPage/RecipesImportCategoryModal.vue';
 import { API_ENDPOINTS } from '@/config/api';
 
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -30,6 +31,8 @@ const isImporting = ref(false);
 const showSuccessAlert = ref(false);
 const showErrorAlert = ref(false);
 const errorMessage = ref('');
+const showImportCategoryModal = ref(false);
+const importedRecipeCard = ref<RecipeCard | null>(null);
 const selectedRecipe = ref<RecipeContainer | null>(null);
 const selectedCarousel = ref<string | null>(null); // Track which carousel was selected
 // Accordion transition hooks — animate height from 0 to auto and back.
@@ -263,12 +266,11 @@ function importRecipe(recipeUrl: string) {
       if (!response.ok) {
         throw new Error(`Failed to import recipe: ${response.statusText}`);
       }
-      return response.json();
+      return response.json() as Promise<RecipeCard>;
     })
-    .then(async () => {
-      // Reload recipes to show in correct carousels
-      await loadRecipes();
-      showSuccessAlert.value = true;
+    .then(async (recipeCard) => {
+      importedRecipeCard.value = recipeCard;
+      showImportCategoryModal.value = true;
     })
     .catch(err => {
       console.error(err);
@@ -278,6 +280,33 @@ function importRecipe(recipeUrl: string) {
     .finally(() => {
       isImporting.value = false;
     });
+}
+
+async function handleImportCategorySave(categoryIds: string[]) {
+  showImportCategoryModal.value = false;
+
+  if (importedRecipeCard.value && categoryIds.length > 0) {
+    try {
+      await fetch(API_ENDPOINTS.UPDATE_RECIPE_CATEGORIES(importedRecipeCard.value.id), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryIds)
+      });
+    } catch (err) {
+      console.error('Failed to save categories:', err);
+    }
+  }
+
+  importedRecipeCard.value = null;
+  await loadRecipes();
+  showSuccessAlert.value = true;
+}
+
+async function handleImportCategorySkip() {
+  showImportCategoryModal.value = false;
+  importedRecipeCard.value = null;
+  await loadRecipes();
+  showSuccessAlert.value = true;
 }
 
 function selectCard(categoryName: string | null, recipe: RecipeContainer) {
@@ -492,6 +521,12 @@ async function confirmDelete() {
       v-if="showAddNewModal"
       @cancel-recipe="showAddNewModal = false"
       @import-recipe="(url: string) => importRecipe(url)"></RecipesAddNewModal>
+
+    <RecipesImportCategoryModal
+      v-if="showImportCategoryModal && importedRecipeCard"
+      :recipe-card="importedRecipeCard"
+      @save="handleImportCategorySave"
+      @skip="handleImportCategorySkip" />
 
     <RecipesAddSuccessAlert
       v-if="showSuccessAlert"
